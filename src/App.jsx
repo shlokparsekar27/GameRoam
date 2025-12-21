@@ -12,6 +12,8 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Marketplace from './pages/Marketplace';
 import UserProfile from './pages/UserProfile';
+import Chat from './pages/Chat';
+import ChatPage from './pages/ChatPage';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -85,6 +87,8 @@ export default function App() {
             <Route path="/marketplace" element={<Marketplace session={session} />} />
             <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/chat" element={<ChatPage session={session} />} />
+            <Route path="/chat/:receiverId" element={<ChatPage session={session} />} />
           </Routes>
         </div>
       </div>

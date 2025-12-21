@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Gamepad2, Menu, X } from 'lucide-react';
+import { Gamepad2, Menu, X, MessageCircle } from 'lucide-react';
 
 export default function Navbar({ session, profile }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,6 +24,10 @@ export default function Navbar({ session, profile }) {
           <div className="hidden md:flex items-center gap-8">
             <Link to="/marketplace" className="text-slate-300 hover:text-white font-medium transition">Marketplace</Link>
             <Link to="/" className="text-slate-300 hover:text-white font-medium transition">My Vault</Link>
+            <Link to="/chat" className="text-slate-300 hover:text-white font-medium transition flex items-center gap-2">
+              <MessageCircle size={20} />
+              <span>Messages</span>
+            </Link>
           </div>
 
           {/* Profile Section (Desktop) */}
@@ -58,7 +62,7 @@ export default function Navbar({ session, profile }) {
         </div>
       </div>
 
-      {/* MOBILE MENU DROPODOWN */}
+      {/* MOBILE MENU DROPDOWN */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-slate-900 border-b border-slate-800 animate-in slide-in-from-top-5">
           <div className="px-4 pt-2 pb-4 space-y-2">
@@ -76,6 +80,16 @@ export default function Navbar({ session, profile }) {
             >
               My Vault
             </Link>
+            
+            {/* FIXED LINE BELOW: Removed 'block' class, kept 'flex' */}
+            <Link 
+              to="/chat" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
+            >
+              <MessageCircle size={18} /> Messages
+            </Link>
+
             <Link 
               to="/profile" 
               onClick={() => setIsMobileMenuOpen(false)}
