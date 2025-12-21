@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Link as LinkIcon, Wand2, Loader2, DollarSign } from 'lucide-react';
+import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Calendar, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function EditGameModal({ game, onClose, onGameUpdated }) {
@@ -9,7 +9,11 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
     platform: game.platform || 'PC',
     listing_type: game.listing_type || 'Library',
     price: game.price || '',
-    cover_url: game.cover_url || ''
+    cover_url: game.cover_url || '',
+    // TRACKING FIELDS
+    transaction_price: game.transaction_price || '',
+    transaction_date: game.transaction_date || '',
+    return_date: game.return_date || ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -49,9 +53,13 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
         title: formData.title,
         platform: formData.platform,
         listing_type: formData.listing_type,
-        // If Library, force price to 0. Else use input.
-        price: formData.listing_type === 'Library' ? 0 : Number(formData.price),
-        cover_url: formData.cover_url
+        // If Library/Sold/Rented Out, price effectively doesn't matter for sorting, but we keep it or zero it.
+        price: (formData.listing_type === 'Rent' || formData.listing_type === 'Sale') ? Number(formData.price) : 0,
+        cover_url: formData.cover_url,
+        // Tracking Updates
+        transaction_price: formData.transaction_price ? Number(formData.transaction_price) : null,
+        transaction_date: formData.transaction_date || null,
+        return_date: formData.return_date || null
       };
 
       const { error } = await supabase
@@ -72,18 +80,17 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-      {/* UPDATED CONTAINER: Added max-h-[90vh] and overflow-y-auto for scrolling */}
       <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
           <X size={24} />
         </button>
 
-        <h2 className="text-2xl font-bold text-white mb-6">Edit Game</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">Edit Game Details</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* TITLE + MAGIC WAND */}
+          {/* TITLE */}
           <div>
             <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Title</label>
             <div className="relative">
@@ -104,7 +111,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
             </div>
           </div>
 
-          {/* COVER IMAGE URL + PREVIEW */}
+          {/* COVER URL */}
           <div>
             <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cover Image URL</label>
             <div className="relative mb-2">
@@ -122,7 +129,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
             )}
           </div>
 
-          {/* PLATFORM & PURPOSE ROW */}
+          {/* PLATFORM & STATUS ROW */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Platform</label>
@@ -139,38 +146,85 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
               </select>
             </div>
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Purpose</label>
+              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status</label>
               <select
                 className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none cursor-pointer"
                 value={formData.listing_type}
                 onChange={e => setFormData({ ...formData, listing_type: e.target.value })}
               >
-                <option value="Library">Collection</option>
-                <option value="Rent">For Rent</option>
-                <option value="Sale">For Sale</option>
+                <optgroup label="Active">
+                  <option value="Library">Collection Only</option>
+                  <option value="Rent">Available for Rent</option>
+                  <option value="Sale">Available for Sale</option>
+                </optgroup>
+                <optgroup label="Lifecycle">
+                  <option value="Rented Out">Rented Out (Away)</option>
+                  <option value="Rented In">Rented In (Borrowed)</option>
+                  <option value="Sold">Sold (History)</option>
+                </optgroup>
               </select>
             </div>
           </div>
 
-          {/* PRICE INPUT (Conditional) */}
-          {formData.listing_type !== 'Library' && (
-            <div className="animate-in fade-in slide-in-from-top-2">
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
-                {formData.listing_type === 'Rent' ? 'Weekly Price ($)' : 'Sale Price ($)'}
-              </label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3.5 text-slate-500" size={16} />
-                <input
-                  required
-                  type="number"
-                  min="0"
-                  className="w-full bg-slate-950 text-white pl-10 pr-3 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
-                  value={formData.price}
-                  onChange={e => setFormData({ ...formData, price: e.target.value })}
-                />
+          {/* DYNAMIC TRACKING FIELDS */}
+          <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50 space-y-3 animate-in slide-in-from-top-2">
+            
+            {/* 1. LISTING PRICE (Rent/Sale) */}
+            {['Rent', 'Sale'].includes(formData.listing_type) && (
+              <div>
+                <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                  {formData.listing_type === 'Rent' ? 'Weekly Price ($)' : 'Sale Price ($)'}
+                </label>
+                <input required type="number" min="0" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-slate-700" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
               </div>
-            </div>
-          )}
+            )}
+
+            {/* 2. PURCHASE DETAILS (Library) */}
+            {formData.listing_type === 'Library' && (
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Bought Price</label>
+                  <div className="relative"><DollarSign className="absolute left-2 top-2.5 text-slate-600" size={12} />
+                  <input type="number" className="w-full bg-slate-900 text-white pl-6 p-2 rounded-lg border border-slate-700 text-sm" placeholder="0.00" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                  </div>
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Bought Date</label>
+                  <input type="date" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-slate-700 text-sm" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+            {/* 3. RETURN DEADLINE (Rented In/Out) - OPTIONAL */}
+            {(formData.listing_type === 'Rented Out' || formData.listing_type === 'Rented In') && (
+              <div>
+                <label className="block text-indigo-400 text-xs font-bold uppercase mb-1">
+                  {formData.listing_type === 'Rented Out' ? 'Expected Return Date (Optional)' : 'Return Deadline (Optional)'}
+                </label>
+                <div className="relative">
+                   <Clock className="absolute left-2 top-2.5 text-indigo-500" size={14} />
+                   <input type="date" className="w-full bg-slate-900 text-white pl-8 p-2 rounded-lg border border-indigo-500/30 text-sm" value={formData.return_date} onChange={e => setFormData({ ...formData, return_date: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+            {/* 4. SOLD DETAILS */}
+            {formData.listing_type === 'Sold' && (
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block text-green-500 text-[10px] font-bold uppercase mb-1">Sold Price</label>
+                  <div className="relative"><DollarSign className="absolute left-2 top-2.5 text-green-600" size={12} />
+                  <input type="number" className="w-full bg-slate-900 text-white pl-6 p-2 rounded-lg border border-green-500/30 text-sm" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                  </div>
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-green-500 text-[10px] font-bold uppercase mb-1">Sold Date</label>
+                  <input type="date" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-green-500/30 text-sm" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+          </div>
 
           <button
             type="submit"

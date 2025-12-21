@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Search, Filter, Gamepad2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Gamepad2, Pencil, Trash2, Clock, CheckCircle, Ban } from 'lucide-react';
 import AddGameModal from '../components/AddGameModal';
 import EditGameModal from '../components/EditGameModal';
 
@@ -18,7 +18,6 @@ export default function Dashboard({ session }) {
   async function fetchGames() {
     try {
       setLoading(true);
-      // Fetching from the new 'games' table
       const { data, error } = await supabase
         .from('games') 
         .select('*')
@@ -46,9 +45,21 @@ export default function Dashboard({ session }) {
     return game.listing_type === filter; 
   });
 
+  // Helper for badge colors
+  const getBadgeStyle = (type) => {
+    switch(type) {
+      case 'Sale': return 'bg-green-600 text-white';
+      case 'Rent': return 'bg-blue-600 text-white';
+      case 'Rented Out': return 'bg-amber-600 text-white';
+      case 'Rented In': return 'bg-purple-600 text-white';
+      case 'Sold': return 'bg-slate-700 text-slate-300';
+      default: return 'bg-slate-800 text-slate-400 border border-slate-700';
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
+    <div className="space-y-6 pb-20">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white">My Vault</h1>
@@ -64,7 +75,7 @@ export default function Dashboard({ session }) {
 
       {/* Filters */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {['All', 'Library', 'Rent', 'Sale'].map((f) => (
+        {['All', 'Library', 'Rent', 'Sale', 'Rented In', 'Rented Out', 'Sold'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -79,22 +90,23 @@ export default function Dashboard({ session }) {
         ))}
       </div>
 
-      {/* Game Grid */}
+      {/* Grid */}
       {loading ? (
         <div className="text-center py-20 text-slate-500 animate-pulse">Loading your vault...</div>
       ) : filteredGames.length === 0 ? (
         <div className="text-center py-20 bg-slate-900/50 rounded-xl border border-dashed border-slate-800">
           <Gamepad2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-300">No games found</h3>
-          <p className="text-slate-500">Start building your collection by adding a game.</p>
+          <p className="text-slate-500">Add games to your collection to see them here.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredGames.map((game) => (
             <div 
               key={game.id} 
-              className="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 transition flex flex-col"
+              className={`group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:shadow-xl transition flex flex-col relative ${game.listing_type === 'Sold' ? 'opacity-75 grayscale-[50%]' : ''}`}
             >
+              
               {/* Image */}
               <div className="aspect-video bg-slate-950 relative overflow-hidden">
                 {game.cover_url ? (
@@ -104,35 +116,35 @@ export default function Dashboard({ session }) {
                     <Gamepad2 size={40} />
                   </div>
                 )}
-                {/* Platform Badge */}
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white border border-white/10 uppercase tracking-wide">
+                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white border border-white/10 uppercase">
                   {game.platform}
                 </div>
-                {/* Listing Tag */}
-                {game.listing_type !== 'Library' && (
-                  <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold text-white border border-white/10 uppercase tracking-wide ${game.listing_type === 'Sale' ? 'bg-green-600' : 'bg-blue-600'}`}>
-                    {game.listing_type}
-                  </div>
-                )}
+                
+                {/* Status Badge */}
+                <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide shadow-sm ${getBadgeStyle(game.listing_type)}`}>
+                  {game.listing_type === 'Library' ? 'Collection' : game.listing_type}
+                </div>
               </div>
 
-              {/* Details */}
+              {/* Body */}
               <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-bold text-lg text-white truncate mb-1">{game.title}</h3>
                 
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-800/50">
                    <div className="text-sm font-medium text-slate-300">
-                     {game.listing_type === 'Library' 
-                       ? <span className="text-slate-500">In Collection</span> 
-                       : <span>${game.price} {game.listing_type === 'Rent' && '/wk'}</span>
-                     }
+                     {/* Dynamic Price Display */}
+                     {game.listing_type === 'Sale' && <span className="text-green-400">${game.price}</span>}
+                     {game.listing_type === 'Rent' && <span className="text-blue-400">${game.price}/wk</span>}
+                     {game.listing_type === 'Rented Out' && <span className="text-amber-500 flex items-center gap-1"><Clock size={14}/> On Loan</span>}
+                     {game.listing_type === 'Sold' && <span className="text-slate-500 flex items-center gap-1"><CheckCircle size={14}/> Sold</span>}
+                     {game.listing_type === 'Library' && <span className="text-slate-500">Vault</span>}
                    </div>
                    
                    <div className="flex gap-2">
-                     <button onClick={() => setEditingGame(game)} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition">
+                     <button onClick={() => setEditingGame(game)} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition" title="Edit Status">
                        <Pencil size={16} />
                      </button>
-                     <button onClick={() => handleDelete(game.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-md transition">
+                     <button onClick={() => handleDelete(game.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-md transition" title="Delete">
                        <Trash2 size={16} />
                      </button>
                    </div>
@@ -151,11 +163,9 @@ export default function Dashboard({ session }) {
         session={session}
       />
       
-      {/* NOTE: We will fix EditGameModal in the next step, for now it might look broken if opened */}
       {editingGame && (
         <EditGameModal
           game={editingGame}
-          isOpen={!!editingGame}
           onClose={() => setEditingGame(null)}
           onGameUpdated={fetchGames}
         />

@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Marketplace from './pages/Marketplace';
+import UserProfile from './pages/UserProfile';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -82,6 +83,7 @@ export default function App() {
             />
             
             <Route path="/marketplace" element={<Marketplace session={session} />} />
+            <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
