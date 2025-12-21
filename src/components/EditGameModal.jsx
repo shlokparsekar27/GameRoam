@@ -1,30 +1,36 @@
 import { useState } from 'react';
-import { X, Link as LinkIcon, Wand2, Loader2 } from 'lucide-react';
+import { X, Link as LinkIcon, Wand2, Loader2, DollarSign } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function EditGameModal({ game, onClose, onGameUpdated }) {
-  const [title, setTitle] = useState(game.title);
-  const [platform, setPlatform] = useState(game.author);
-  const [status, setStatus] = useState(game.status);
-  const [coverUrl, setCoverUrl] = useState(game.cover_url || ''); 
-  
-  const [loading, setLoading] = useState(false);
-  const [fetchingImage, setFetchingImage] = useState(false); // <--- For the Wand
+  // Initialize state with existing game data
+  const [formData, setFormData] = useState({
+    title: game.title,
+    platform: game.platform || 'PC',
+    listing_type: game.listing_type || 'Library',
+    price: game.price || '',
+    cover_url: game.cover_url || ''
+  });
 
-  // --- AUTO-FETCH LOGIC (Same as Add Modal) ---
+  const [loading, setLoading] = useState(false);
+  const [fetchingImage, setFetchingImage] = useState(false);
+
+  // --- MAGIC WAND LOGIC ---
   async function fetchGameCover() {
-    if (!title) return alert("Type a game name first!");
+    if (!formData.title) return alert("Type a game name first!");
     
     setFetchingImage(true);
     try {
       const apiKey = import.meta.env.VITE_RAWG_API_KEY;
-      const response = await fetch(`https://api.rawg.io/api/games?key=${apiKey}&search=${title}&page_size=1`);
+      if (!apiKey) return alert("Missing API Key!");
+
+      const response = await fetch(`https://api.rawg.io/api/games?key=${apiKey}&search=${formData.title}&page_size=1`);
       const data = await response.json();
 
       if (data.results && data.results.length > 0) {
-        setCoverUrl(data.results[0].background_image);
+        setFormData(prev => ({ ...prev, cover_url: data.results[0].background_image }));
       } else {
-        alert("No game found!");
+        alert("No game found! Try checking the spelling.");
       }
     } catch (error) {
       console.error(error);
@@ -38,30 +44,38 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase
-      .from('items')
-      .update({ 
-        title, 
-        author: platform, 
-        status, 
-        cover_url: coverUrl 
-      })
-      .eq('id', game.id);
+    try {
+      const updates = {
+        title: formData.title,
+        platform: formData.platform,
+        listing_type: formData.listing_type,
+        // If Library, force price to 0. Else use input.
+        price: formData.listing_type === 'Library' ? 0 : Number(formData.price),
+        cover_url: formData.cover_url
+      };
 
-    setLoading(false);
+      const { error } = await supabase
+        .from('games')
+        .update(updates)
+        .eq('id', game.id);
 
-    if (error) {
-      alert(error.message);
-    } else {
+      if (error) throw error;
+
       onGameUpdated();
       onClose();
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      {/* UPDATED CONTAINER: Added max-h-[90vh] and overflow-y-auto for scrolling */}
+      <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
           <X size={24} />
         </button>
 
@@ -74,14 +88,14 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
             <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Title</label>
             <div className="relative">
               <input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                className="w-full bg-slate-950 text-white p-3 pr-12 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                className="w-full bg-slate-950 text-white p-3 pr-12 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition"
               />
                <button
                 type="button"
                 onClick={fetchGameCover}
-                disabled={fetchingImage || !title}
+                disabled={fetchingImage || !formData.title}
                 className="absolute right-2 top-2 p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition disabled:opacity-50"
                 title="Auto-fetch Cover Art"
               >
@@ -96,45 +110,72 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
             <div className="relative mb-2">
               <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
               <input
-                value={coverUrl}
-                onChange={e => setCoverUrl(e.target.value)}
+                value={formData.cover_url}
+                onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
                 className="w-full bg-slate-950 text-white pl-10 pr-3 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
               />
             </div>
-            {coverUrl && (
+            {formData.cover_url && (
               <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-800 relative group">
-                <img src={coverUrl} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
+                <img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
               </div>
             )}
           </div>
 
+          {/* PLATFORM & PURPOSE ROW */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Platform</label>
-              <input
-                value={platform}
-                onChange={e => setPlatform(e.target.value)}
-                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
-              />
+              <select
+                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none cursor-pointer"
+                value={formData.platform}
+                onChange={e => setFormData({ ...formData, platform: e.target.value })}
+              >
+                <option value="PC">PC</option>
+                <option value="PS5">PlayStation 5</option>
+                <option value="PS4">PlayStation 4</option>
+                <option value="Xbox">Xbox Series X/S</option>
+                <option value="Switch">Nintendo Switch</option>
+              </select>
             </div>
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status</label>
+              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Purpose</label>
               <select
-                value={status}
-                onChange={e => setStatus(e.target.value)}
-                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none"
+                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none cursor-pointer"
+                value={formData.listing_type}
+                onChange={e => setFormData({ ...formData, listing_type: e.target.value })}
               >
-                <option>Backlog</option>
-                <option>Playing</option>
-                <option>Completed</option>
+                <option value="Library">Collection</option>
+                <option value="Rent">For Rent</option>
+                <option value="Sale">For Sale</option>
               </select>
             </div>
           </div>
 
+          {/* PRICE INPUT (Conditional) */}
+          {formData.listing_type !== 'Library' && (
+            <div className="animate-in fade-in slide-in-from-top-2">
+              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                {formData.listing_type === 'Rent' ? 'Weekly Price ($)' : 'Sale Price ($)'}
+              </label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3.5 text-slate-500" size={16} />
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  className="w-full bg-slate-950 text-white pl-10 pr-3 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
+                  value={formData.price}
+                  onChange={e => setFormData({ ...formData, price: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl mt-4 transition shadow-lg shadow-indigo-600/20"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl mt-4 transition shadow-lg shadow-indigo-600/20 disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
