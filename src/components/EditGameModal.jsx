@@ -3,14 +3,12 @@ import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Calendar, Clock } from
 import { supabase } from '../lib/supabase';
 
 export default function EditGameModal({ game, onClose, onGameUpdated }) {
-  // Initialize state with existing game data
   const [formData, setFormData] = useState({
     title: game.title,
     platform: game.platform || 'PC',
     listing_type: game.listing_type || 'Library',
     price: game.price || '',
     cover_url: game.cover_url || '',
-    // TRACKING FIELDS
     transaction_price: game.transaction_price || '',
     transaction_date: game.transaction_date || '',
     return_date: game.return_date || ''
@@ -53,10 +51,8 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
         title: formData.title,
         platform: formData.platform,
         listing_type: formData.listing_type,
-        // If Library/Sold/Rented Out, price effectively doesn't matter for sorting, but we keep it or zero it.
         price: (formData.listing_type === 'Rent' || formData.listing_type === 'Sale') ? Number(formData.price) : 0,
         cover_url: formData.cover_url,
-        // Tracking Updates
         transaction_price: formData.transaction_price ? Number(formData.transaction_price) : null,
         transaction_date: formData.transaction_date || null,
         return_date: formData.return_date || null
@@ -79,7 +75,8 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+    // UPDATED: z-[100] to cover navbar
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
@@ -97,9 +94,26 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
               <input
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-slate-950 text-white p-3 pr-12 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition"
+                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition"
               />
-               <button
+            </div>
+          </div>
+
+          {/* COVER URL + MAGIC WAND */}
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cover Image URL</label>
+            <div className="relative mb-2">
+              <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
+              
+              <input
+                value={formData.cover_url}
+                onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
+                className="w-full bg-slate-950 text-white pl-10 pr-12 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none placeholder:text-slate-600"
+                placeholder="Click the magic wand to auto-fill →"
+              />
+              
+              {/* MOVED: Magic Wand Button Here */}
+              <button
                 type="button"
                 onClick={fetchGameCover}
                 disabled={fetchingImage || !formData.title}
@@ -109,19 +123,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                 {fetchingImage ? <Loader2 className="animate-spin" size={16} /> : <Wand2 size={16} />}
               </button>
             </div>
-          </div>
-
-          {/* COVER URL */}
-          <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cover Image URL</label>
-            <div className="relative mb-2">
-              <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
-              <input
-                value={formData.cover_url}
-                onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
-                className="w-full bg-slate-950 text-white pl-10 pr-3 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none"
-              />
-            </div>
+            
             {formData.cover_url && (
               <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-800 relative group">
                 <img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />

@@ -83,28 +83,52 @@ export default function AddGameModal({ isOpen, onClose, onGameAdded, session }) 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+    // UPDATED: z-[100] to cover navbar
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10"><X size={24} /></button>
         <h2 className="text-2xl font-bold text-white mb-6">Add New Game</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* TITLE & COVER */}
+          {/* TITLE */}
           <div>
             <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Title</label>
             <div className="relative">
-              <input autoFocus value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-slate-950 text-white p-3 pr-12 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition" placeholder="e.g. Elden Ring" />
-              <button type="button" onClick={fetchGameCover} disabled={fetchingImage || !formData.title} className="absolute right-2 top-2 p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition disabled:opacity-50"><Wand2 size={16} /></button>
+              <input autoFocus value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition" placeholder="e.g. Elden Ring" />
             </div>
           </div>
+
+          {/* COVER URL + MAGIC WAND */}
           <div>
              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cover Image URL</label>
              <div className="relative mb-2">
                <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
-               <input value={formData.cover_url} onChange={e => setFormData({ ...formData, cover_url: e.target.value })} className="w-full bg-slate-950 text-white pl-10 pr-3 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none" />
+               
+               <input 
+                 value={formData.cover_url} 
+                 onChange={e => setFormData({ ...formData, cover_url: e.target.value })} 
+                 className="w-full bg-slate-950 text-white pl-10 pr-12 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none placeholder:text-slate-600" 
+                 placeholder="Click the magic wand to auto-fill →"
+               />
+               
+               {/* MOVED: Magic Wand Button Here */}
+               <button 
+                  type="button" 
+                  onClick={fetchGameCover} 
+                  disabled={fetchingImage || !formData.title} 
+                  className="absolute right-2 top-2 p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition disabled:opacity-50"
+                  title="Auto-fetch Cover Art"
+                >
+                  {fetchingImage ? <Loader2 className="animate-spin" size={16} /> : <Wand2 size={16} />}
+               </button>
              </div>
-             {formData.cover_url && <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-800 relative"><img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-80" /></div>}
+             
+             {formData.cover_url && (
+               <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-800 relative">
+                 <img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-80" />
+               </div>
+             )}
           </div>
 
           {/* SETTINGS */}

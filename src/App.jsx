@@ -19,6 +19,10 @@ import CommunityFeed from './pages/CommunityFeed';
 import PostDetails from './pages/PostDetails';
 import ViewPost from './pages/ViewPost';
 
+import About from './pages/About';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+
 export default function App() {
   const [session, setSession] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -84,7 +88,9 @@ export default function App() {
             <Route path="/community" element={<Community session={session} />} />
             <Route path="/community/feed" element={<CommunityFeed session={session} />} />
             <Route path="/community/post/:postId" element={<PostDetails session={session} />} />
-            <Route path="/community/post/:postId" element={<ViewPost session={session} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </div>
 

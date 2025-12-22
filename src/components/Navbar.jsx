@@ -31,7 +31,9 @@ export default function Navbar({ session, profile }) {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
             <Gamepad2 className="w-8 h-8 text-indigo-500" />
-            <span>GameRoam</span>
+            <span>
+              Game<span className="text-indigo-500">Roam</span>
+            </span>
           </Link>
 
           {/* DESKTOP Navigation (Highlighted when active) */}
