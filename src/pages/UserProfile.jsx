@@ -73,7 +73,7 @@ export default function UserProfile({ session }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16 text-white animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto px-4 pt-12 pb-48 text-white animate-in fade-in duration-500">
       
       {/* --- HEADER SECTION --- */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
