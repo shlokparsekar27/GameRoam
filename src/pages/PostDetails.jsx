@@ -15,6 +15,15 @@ export default function PostDetails({ session }) {
 
   const myId = session.user.id;
 
+  // --- NEW: Smart Navigation Helper ---
+  const handleUserClick = (userId) => {
+    if (userId === myId) {
+      navigate('/profile'); // Go to MY profile
+    } else {
+      navigate(`/user/${userId}`); // Go to THEIR public profile
+    }
+  };
+
   useEffect(() => {
     fetchPostAndComments();
 
@@ -30,7 +39,6 @@ export default function PostDetails({ session }) {
 
   async function fetchPostAndComments() {
     try {
-      // 1. Fetch Post
       const { data: postData, error: postError } = await supabase
         .from('community_posts')
         .select('*, author:profiles(id, username, avatar_url)')
@@ -40,7 +48,6 @@ export default function PostDetails({ session }) {
       if (postError) throw postError;
       setPost(postData);
 
-      // 2. Fetch Comments
       const { data: commentsData, error: commentsError } = await supabase
         .from('community_comments')
         .select('*, author:profiles(id, username, avatar_url)')
@@ -51,7 +58,7 @@ export default function PostDetails({ session }) {
       setComments(commentsData || []);
     } catch (error) {
       console.error("Error loading post:", error);
-      navigate('/community'); // Go back if error
+      navigate('/community/feed'); 
     } finally {
       setLoading(false);
     }
@@ -60,9 +67,19 @@ export default function PostDetails({ session }) {
   async function fetchSingleComment(commentId) {
     const { data } = await supabase.from('community_comments').select('*, author:profiles(id, username, avatar_url)').eq('id', commentId).single();
     if (data) {
-      // Only add if not already there (prevents duplicates from realtime + local add)
       setComments(prev => prev.some(c => c.id === data.id) ? prev : [...prev, data]);
       setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+  }
+
+  async function handleDeletePost() {
+    if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) return;
+    try {
+      const { error } = await supabase.from('community_posts').delete().eq('id', postId);
+      if (error) throw error;
+      navigate('/community/feed'); 
+    } catch (error) {
+      alert("Error deleting post: " + error.message);
     }
   }
 
@@ -71,7 +88,7 @@ export default function PostDetails({ session }) {
     setSubmitting(true);
     
     const content = newComment;
-    setNewComment(''); // Instant clear
+    setNewComment(''); 
 
     try {
       const { error } = await supabase.from('community_comments').insert({
@@ -82,7 +99,7 @@ export default function PostDetails({ session }) {
       if (error) throw error;
     } catch (error) {
       alert("Failed to comment");
-      setNewComment(content); // Restore if failed
+      setNewComment(content); 
     } finally {
       setSubmitting(false);
     }
@@ -101,21 +118,32 @@ export default function PostDetails({ session }) {
     <div className="min-h-screen bg-slate-950 animate-in fade-in duration-500">
       <div className="max-w-3xl mx-auto px-4 py-8">
         
-        {/* Header / Back */}
-        <button onClick={() => navigate('/community')} className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition">
-          <ArrowLeft size={20} /> Back to Community
+        <button onClick={() => navigate('/community/feed')} className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition">
+          <ArrowLeft size={20} /> Back to Feed
         </button>
 
         {/* --- THE POST --- */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-8 shadow-xl">
-          <div className="p-4 flex items-center gap-3 border-b border-slate-800/50">
-            <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
-               {post.author?.avatar_url ? <img src={post.author.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center font-bold text-white">{post.author?.username?.[0]}</div>}
+          <div className="p-4 flex justify-between items-center border-b border-slate-800/50">
+            {/* Post Author Header */}
+            <div 
+              className="flex items-center gap-3 cursor-pointer group"
+              onClick={() => handleUserClick(post.user_id)} // <--- UPDATED
+            >
+              <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden group-hover:ring-2 ring-indigo-500 transition">
+                 {post.author?.avatar_url ? <img src={post.author.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center font-bold text-white">{post.author?.username?.[0]}</div>}
+              </div>
+              <div>
+                <p className="font-bold text-white group-hover:text-indigo-400 transition">{post.author?.username}</p>
+                <p className="text-xs text-slate-500">{new Date(post.created_at).toLocaleDateString()} at {new Date(post.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-white">{post.author?.username}</p>
-              <p className="text-xs text-slate-500">{new Date(post.created_at).toLocaleDateString()} at {new Date(post.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
-            </div>
+
+            {post.user_id === myId && (
+              <button onClick={handleDeletePost} className="text-slate-400 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition" title="Delete Post">
+                <Trash2 size={20} />
+              </button>
+            )}
           </div>
           
           <div className="p-4">
@@ -137,11 +165,8 @@ export default function PostDetails({ session }) {
         <div className="space-y-6">
           <h3 className="text-xl font-bold text-white">Discussion</h3>
           
-          {/* Comment Input */}
           <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white shrink-0 mt-1">
-              ME
-            </div>
+            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white shrink-0 mt-1">ME</div>
             <div className="flex-1 relative">
               <textarea 
                 value={newComment}
@@ -159,30 +184,36 @@ export default function PostDetails({ session }) {
             </div>
           </div>
 
-          {/* Comments List */}
           <div className="space-y-4 pb-20">
             {comments.map(c => (
               <div key={c.id} className="flex gap-4 group">
-                <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden shrink-0 border border-slate-700">
+                <div 
+                  onClick={() => handleUserClick(c.user_id)} // <--- UPDATED
+                  className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden shrink-0 border border-slate-700 cursor-pointer hover:border-indigo-500 transition"
+                >
                    {c.author?.avatar_url ? <img src={c.author.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center font-bold text-white text-xs">{c.author?.username?.[0]}</div>}
                 </div>
+
                 <div className="flex-1">
-                  <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl rounded-tl-none relative">
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="font-bold text-indigo-400 text-sm">{c.author?.username}</p>
-                      <span className="text-[10px] text-slate-500">{new Date(c.created_at).toLocaleDateString()}</span>
+                  <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl rounded-tl-none">
+                    <div className="flex justify-between items-center mb-1">
+                      <p 
+                        onClick={() => handleUserClick(c.user_id)} // <--- UPDATED
+                        className="font-bold text-indigo-400 text-sm cursor-pointer hover:underline hover:text-indigo-300 transition"
+                      >
+                        {c.author?.username}
+                      </p>
+                      
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] text-slate-500">{new Date(c.created_at).toLocaleDateString()}</span>
+                        {c.user_id === myId && (
+                          <button onClick={() => handleDeleteComment(c.id)} className="text-slate-500 hover:text-red-500 transition" title="Delete Comment">
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p className="text-slate-300 text-sm leading-relaxed">{c.content}</p>
-                    
-                    {/* Delete Button (If Owner) */}
-                    {c.user_id === myId && (
-                      <button 
-                        onClick={() => handleDeleteComment(c.id)}
-                        className="absolute top-2 right-2 p-1.5 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -190,7 +221,6 @@ export default function PostDetails({ session }) {
             <div ref={commentsEndRef} />
           </div>
         </div>
-
       </div>
     </div>
   );

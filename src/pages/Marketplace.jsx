@@ -64,7 +64,7 @@ export default function Marketplace({ session }) {
   return (
     <>
       {/* 1. MAIN PAGE CONTENT (Animated) */}
-      <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+      <div className="space-y-8 animate-in fade-in duration-500 pb-28">
         
         {/* HERO / FILTERS */}
         <div className="bg-gradient-to-r from-indigo-900/50 to-slate-900 border border-indigo-500/20 rounded-3xl p-8 relative overflow-hidden shadow-2xl">

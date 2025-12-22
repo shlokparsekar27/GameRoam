@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { MapPin, Gamepad2, Loader2, Calendar, ShoppingBag } from 'lucide-react';
+import { 
+  MapPin, Calendar, Loader2, Grid, ShoppingBag, Heart, MessageCircle, Camera 
+} from 'lucide-react';
 
-export default function UserProfile() {
-  const { userId } = useParams(); // Get the ID from the URL
-  const [profile, setProfile] = useState(null);
-  const [games, setGames] = useState([]);
+export default function UserProfile({ session }) {
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [userPosts, setUserPosts] = useState([]);
+  const [userListings, setUserListings] = useState([]);
+  const [activeTab, setActiveTab] = useState('posts'); 
+
+  // Check if this is ME
+  const isMe = session?.user?.id === userId;
 
   useEffect(() => {
     async function fetchData() {
@@ -24,16 +33,22 @@ export default function UserProfile() {
         if (profileError) throw profileError;
         setProfile(profileData);
 
-        // 2. Fetch User's Public Listings (Rent or Sale ONLY)
-        const { data: gamesData, error: gamesError } = await supabase
+        // 2. Fetch User's Posts
+        const { data: postsData } = await supabase
+          .from('community_posts')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        setUserPosts(postsData || []);
+
+        // 3. Fetch User's Public Listings (Rent or Sale ONLY)
+        const { data: gamesData } = await supabase
           .from('games')
           .select('*')
           .eq('owner_id', userId)
-          .in('listing_type', ['Rent', 'Sale']) // Only show public items
+          .in('listing_type', ['Rent', 'Sale'])
           .order('created_at', { ascending: false });
-
-        if (gamesError) throw gamesError;
-        setGames(gamesData || []);
+        setUserListings(gamesData || []);
 
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -58,83 +73,154 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="max-w-4xl mx-auto px-4 py-16 text-white animate-in fade-in duration-500">
       
-      {/* 1. HEADER SECTION */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center gap-8">
-        {/* Background Blur */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900/20 to-transparent pointer-events-none" />
+      {/* --- HEADER SECTION --- */}
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
         
         {/* Avatar */}
-        <div className="w-32 h-32 rounded-full border-4 border-slate-800 bg-slate-950 flex items-center justify-center overflow-hidden shrink-0 z-10 relative">
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-4xl font-bold text-indigo-500">{profile.username?.[0]?.toUpperCase()}</span>
-          )}
+        <div className="shrink-0">
+           <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-slate-800 bg-slate-900 overflow-hidden">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-slate-600">
+                  {profile.username?.[0]?.toUpperCase()}
+                </div>
+              )}
+           </div>
         </div>
 
-        {/* Info */}
-        <div className="text-center md:text-left z-10">
-          <h1 className="text-4xl font-extrabold text-white mb-2">{profile.username}</h1>
+        {/* Info Column */}
+        <div className="flex-1 text-center md:text-left w-full">
           
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-slate-400">
-            {profile.location && (
-              <span className="flex items-center gap-1.5 bg-slate-800/50 px-3 py-1 rounded-full text-sm">
-                <MapPin size={14} /> {profile.location}
-              </span>
+          {/* Username + Chat Button (JUSTIFIED APART) */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4 md:mb-6 w-full">
+            <h1 className="text-2xl md:text-3xl font-light">{profile.username}</h1>
+            
+            {/* NEW: Chat Button (Pushed to Right) */}
+            {!isMe && (
+              <button 
+                onClick={() => navigate(`/chat/${userId}`)}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-bold text-sm transition flex items-center gap-2 shadow-lg shadow-indigo-500/20"
+              >
+                <MessageCircle size={18} /> Message
+              </button>
             )}
-            <span className="flex items-center gap-1.5 bg-slate-800/50 px-3 py-1 rounded-full text-sm">
-              <Calendar size={14} /> Joined {new Date(profile.created_at || Date.now()).toLocaleDateString()}
-            </span>
+          </div>
+
+          {/* Stats Row */}
+          <div className="flex justify-center md:justify-start gap-8 mb-6 text-base">
+            <div className="flex gap-1">
+              <span className="font-bold text-white">{userPosts.length}</span> <span className="text-slate-400">posts</span>
+            </div>
+            <div className="flex gap-1">
+              <span className="font-bold text-white">{userListings.length}</span> <span className="text-slate-400">listings</span>
+            </div>
+          </div>
+
+          {/* Details Section */}
+          <div className="space-y-1 text-sm text-slate-400">
+             {profile.location && (
+               <p className="flex items-center justify-center md:justify-start gap-1">
+                 <MapPin size={14} /> {profile.location}
+               </p>
+             )}
+             <p className="flex items-center justify-center md:justify-start gap-1">
+               <Calendar size={14} /> Joined {new Date(profile.created_at || Date.now()).toLocaleDateString()}
+             </p>
           </div>
         </div>
       </div>
 
-      {/* 2. LISTINGS GRID */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-          <ShoppingBag className="text-indigo-500" /> Active Listings
-        </h2>
+      {/* --- TABS --- */}
+      <div className="border-t border-slate-800 mb-4">
+        <div className="flex justify-center gap-12">
+          <button 
+            onClick={() => setActiveTab('posts')}
+            className={`flex items-center gap-2 py-4 text-xs font-bold tracking-widest uppercase border-t-2 transition ${activeTab === 'posts' ? 'border-white text-white' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+          >
+            <Grid size={12} /> Posts
+          </button>
+          <button 
+            onClick={() => setActiveTab('listings')}
+            className={`flex items-center gap-2 py-4 text-xs font-bold tracking-widest uppercase border-t-2 transition ${activeTab === 'listings' ? 'border-white text-white' : 'border-transparent text-slate-500 hover:text-slate-300'}`}
+          >
+            <ShoppingBag size={12} /> Listings
+          </button>
+        </div>
+      </div>
 
-        {games.length === 0 ? (
-          <div className="text-center py-20 bg-slate-900/30 rounded-3xl border border-slate-800 border-dashed">
-            <Gamepad2 className="mx-auto text-slate-700 mb-4" size={48} />
-            <p className="text-slate-500">This user hasn't listed any games yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {games.map((game) => (
-              <div key={game.id} className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden hover:border-indigo-500/50 transition flex flex-col group">
-                {/* Cover Image */}
-                <div className="h-48 relative bg-slate-950 overflow-hidden">
-                  {game.cover_url ? (
-                    <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-700"><Gamepad2 size={40} /></div>
-                  )}
-                  <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold text-white uppercase shadow-lg ${
-                    game.listing_type === 'Sale' ? 'bg-green-600' : 'bg-blue-600'
-                  }`}>
-                    {game.listing_type}
+      {/* --- GRID CONTENT --- */}
+      
+      {/* 1. POSTS TAB */}
+      {activeTab === 'posts' && (
+        <div className="grid grid-cols-3 gap-1 md:gap-4">
+          {userPosts.length === 0 ? (
+            <div className="col-span-3 py-20 text-center text-slate-500 bg-slate-900/50 rounded-xl">
+              <Camera className="mx-auto mb-2 opacity-50" size={40}/>
+              <p>No posts yet</p>
+            </div>
+          ) : (
+            userPosts.map(post => (
+              <div 
+                key={post.id} 
+                onClick={() => navigate(`/community/post/${post.id}`)}
+                className="relative aspect-square bg-slate-900 cursor-pointer group overflow-hidden border border-slate-800"
+              >
+                {post.image_url ? (
+                  <img src={post.image_url} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full p-4 flex items-center justify-center bg-slate-800 text-center">
+                    <p className="text-xs md:text-sm text-slate-400 line-clamp-4">{post.content}</p>
                   </div>
-                </div>
-
-                {/* Body */}
-                <div className="p-4">
-                  <h3 className="font-bold text-white truncate mb-1">{game.title}</h3>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold uppercase text-slate-500 bg-slate-800 px-2 py-0.5 rounded">{game.platform}</span>
-                    <span className="font-bold text-indigo-400">
-                      ${game.price}{game.listing_type === 'Rent' && '/wk'}
-                    </span>
-                  </div>
+                )}
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition duration-200">
+                   <div className="flex items-center gap-1 font-bold">
+                     <Heart className="fill-white text-white" size={20} /> {post.likes_count || 0}
+                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* 2. LISTINGS TAB */}
+      {activeTab === 'listings' && (
+        <div className="grid grid-cols-3 gap-1 md:gap-4">
+           {userListings.length === 0 ? (
+            <div className="col-span-3 py-20 text-center text-slate-500 bg-slate-900/50 rounded-xl">
+              <ShoppingBag className="mx-auto mb-2 opacity-50" size={40}/>
+              <p>No active listings</p>
+            </div>
+          ) : (
+            userListings.map(game => (
+              <div key={game.id} className="relative aspect-square bg-slate-900 border border-slate-800 group overflow-hidden">
+                {game.cover_url ? (
+                  <img src={game.cover_url} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-600 font-bold">{game.title[0]}</div>
+                )}
+                
+                <div className="absolute top-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                  {game.listing_type}
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition">
+                  <p className="text-xs font-bold truncate">{game.title}</p>
+                  <p className="text-xs text-indigo-400 font-bold">
+                    ${game.price}{game.listing_type === 'Rent' ? '/wk' : ''}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
