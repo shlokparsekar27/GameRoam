@@ -107,12 +107,11 @@ export default function ChatPage({ session }) {
             other_user: partner,
             last_message: msg,
             last_message_at: msg.created_at,
-            unread_count: 0 // Initialized as snake_case
+            unread_count: 0 
           });
         }
         
         // INCREMENT UNREAD COUNT
-        // FIXED: Using snake_case 'unread_count' here to match the initialization
         if (!isMeSender && !msg.is_read) {
           partnerMap.get(partner.id).unread_count += 1; 
         }
@@ -142,8 +141,13 @@ export default function ChatPage({ session }) {
     };
   }, [fetchConversations]);
 
+  // --- ADDED FIX: Scroll to top when receiverId changes ---
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [receiverId]);
+
   return (
-    <div className="flex h-[calc(100vh-5rem)] bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in duration-500">
+    <div className="flex h-[calc(100vh-8rem)] bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in duration-500">
       
       {/* 1. SIDEBAR (Conversation List) */}
       {loading ? (

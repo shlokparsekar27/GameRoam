@@ -1,13 +1,27 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom'; // 1. Added NavLink
 import { Gamepad2, Menu, X, MessageCircle } from 'lucide-react';
 
 export default function Navbar({ session, profile }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Use profile data or fallback to email
   const displayName = profile?.username || session.user.email.split('@')[0];
   const avatarUrl = profile?.avatar_url;
+
+  // 2. Helper function to keep classes clean
+  const getNavLinkClass = ({ isActive }) => 
+    `font-medium transition ${
+      isActive 
+        ? 'text-indigo-400' 
+        : 'text-slate-300 hover:text-white'
+    }`;
+
+  const getMobileNavLinkClass = ({ isActive }) => 
+    `block px-3 py-3 rounded-md text-base font-medium transition ${
+      isActive 
+        ? 'bg-indigo-600/10 text-indigo-400' 
+        : 'text-slate-300 hover:text-white hover:bg-slate-800'
+    }`;
 
   return (
     <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
@@ -20,37 +34,44 @@ export default function Navbar({ session, profile }) {
             <span>GameRoam</span>
           </Link>
 
-          {/* DESKTOP Navigation (Hidden on Mobile) */}
+          {/* DESKTOP Navigation (Highlighted when active) */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/marketplace" className="text-slate-300 hover:text-white font-medium transition">Marketplace</Link>
-            <Link to="/community" className="text-slate-300 hover:text-white font-medium transition">Community</Link>
-            <Link to="/" className="text-slate-300 hover:text-white font-medium transition">My Vault</Link>
-            <Link to="/chat" className="text-slate-300 hover:text-white font-medium transition flex items-center gap-2">
+            <NavLink to="/marketplace" className={getNavLinkClass}>Marketplace</NavLink>
+            <NavLink to="/community" className={getNavLinkClass}>Community</NavLink>
+            <NavLink to="/" className={getNavLinkClass}>My Vault</NavLink>
+            <NavLink to="/chat" className={({ isActive }) => `${getNavLinkClass({ isActive })} flex items-center gap-2`}>
               <MessageCircle size={20} />
               <span>Messages</span>
-            </Link>
+            </NavLink>
           </div>
 
           {/* Profile Section (Desktop) */}
           <div className="hidden md:flex items-center">
-            <Link to="/profile" className="flex items-center gap-3 pl-6 border-l border-slate-800 group cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-500 transition">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white">
-                    {displayName[0]?.toUpperCase()}
+            {/* Added end to ensure /profile doesn't highlight when on sub-pages if necessary */}
+            <NavLink to="/profile" className="flex items-center gap-3 pl-6 border-l border-slate-800 group cursor-pointer">
+              {({ isActive }) => (
+                <>
+                  <div className={`w-10 h-10 rounded-full bg-slate-800 overflow-hidden ring-2 transition ${isActive ? 'ring-indigo-500' : 'ring-transparent group-hover:ring-slate-700'}`}>
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+                        {displayName[0]?.toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="text-right">
-                <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition">{displayName}</p>
-              </div>       
-            </Link>
+                  <div className="text-right">
+                    <p className={`text-sm font-bold transition ${isActive ? 'text-indigo-400' : 'text-white group-hover:text-indigo-400'}`}>
+                      {displayName}
+                    </p>
+                  </div>
+                </>
+              )}
+            </NavLink>
           </div>
 
-          {/* MOBILE Menu Button (Visible only on small screens) */}
+          {/* MOBILE Menu Button */}
           <div className="md:hidden flex items-center">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -63,50 +84,29 @@ export default function Navbar({ session, profile }) {
         </div>
       </div>
 
-      {/* MOBILE MENU DROPDOWN */}
+      {/* MOBILE MENU DROPDOWN (Highlighted when active) */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-slate-900 border-b border-slate-800 animate-in slide-in-from-top-5">
           <div className="px-4 pt-2 pb-4 space-y-2">
-            <Link 
-              to="/marketplace" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800"
-            >
+            <NavLink to="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
               Marketplace
-            </Link>
+            </NavLink>
 
-            <Link 
-            to="/community" 
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="block px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800"
-             >
+            <NavLink to="/community" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
               Community
-            </Link>
+            </NavLink>
 
-            <Link 
-              to="/" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800"
-            >
+            <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
               My Vault
-            </Link>
+            </NavLink>
             
-            {/* FIXED LINE BELOW: Removed 'block' class, kept 'flex' */}
-            <Link 
-              to="/chat" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2"
-            >
+            <NavLink to="/chat" onClick={() => setIsMobileMenuOpen(false)} className={({ isActive }) => `${getMobileNavLinkClass({ isActive })} flex items-center gap-2`}>
               <MessageCircle size={18} /> Messages
-            </Link>
+            </NavLink>
 
-            <Link 
-              to="/profile" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800"
-            >
+            <NavLink to="/profile" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       )}
