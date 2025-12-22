@@ -51,7 +51,7 @@ export default function Community() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto px-4 pb-80 animate-in fade-in duration-500">
       
       {/* Page Header */}
       <div className="text-center mb-16">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom'; // 1. Added NavLink
+import { NavLink, Link } from 'react-router-dom'; 
 import { Gamepad2, Menu, X, MessageCircle } from 'lucide-react';
 
 export default function Navbar({ session, profile }) {
@@ -8,7 +8,7 @@ export default function Navbar({ session, profile }) {
   const displayName = profile?.username || session.user.email.split('@')[0];
   const avatarUrl = profile?.avatar_url;
 
-  // 2. Helper function to keep classes clean
+  // Helper function to keep classes clean
   const getNavLinkClass = ({ isActive }) => 
     `font-medium transition ${
       isActive 
@@ -24,12 +24,12 @@ export default function Navbar({ session, profile }) {
     }`;
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
+    <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-[100]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
+          {/* Logo - UPDATED: Now links to /marketplace */}
+          <Link to="/marketplace" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
             <Gamepad2 className="w-8 h-8 text-indigo-500" />
             <span>
               Game<span className="text-indigo-500">Roam</span>
@@ -49,7 +49,6 @@ export default function Navbar({ session, profile }) {
 
           {/* Profile Section (Desktop) */}
           <div className="hidden md:flex items-center">
-            {/* Added end to ensure /profile doesn't highlight when on sub-pages if necessary */}
             <NavLink to="/profile" className="flex items-center gap-3 pl-6 border-l border-slate-800 group cursor-pointer">
               {({ isActive }) => (
                 <>
