@@ -62,13 +62,13 @@ export default function Marketplace({ session }) {
     <div className="min-h-screen pb-20 animate-in fade-in duration-700">
       
       {/* 1. HERO SECTION */}
-      <div className="relative mb-12 py-12 px-6 md:px-12 rounded-3xl overflow-hidden">
+      <div className="relative mb-4 py-2 px-6 md:px-12 rounded-3xl overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/40 via-purple-900/20 to-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl" />
         
         <div className="relative z-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 mb-2 drop-shadow-lg">
+            <h1 className="text-5xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 mb-2 drop-shadow-lg">
               Marketplace
             </h1>
             <p className="text-indigo-300/80 text-lg max-w-lg">

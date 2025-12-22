@@ -1,19 +1,44 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Search, Filter, Gamepad2, Pencil, Trash2, Clock, CheckCircle, Ban } from 'lucide-react';
+import { 
+  Plus, Gamepad2, Pencil, Trash2, Clock, CheckCircle, 
+  Archive, DollarSign, Activity, LayoutGrid, X, MapPin, ArrowDownCircle 
+} from 'lucide-react';
+import { createPortal } from 'react-dom'; // Ensure this is imported for the modals
 import AddGameModal from '../components/AddGameModal';
 import EditGameModal from '../components/EditGameModal';
 
 export default function Dashboard({ session }) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Profile state for the modal "Owner" section
+  const [profile, setProfile] = useState(null);
+  
+  // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingGame, setEditingGame] = useState(null);
+  const [selectedGame, setSelectedGame] = useState(null); 
+  
   const [filter, setFilter] = useState('All'); 
 
   useEffect(() => {
     fetchGames();
+    fetchProfile();
   }, [session]);
+
+  async function fetchProfile() {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      if (data) setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  }
 
   async function fetchGames() {
     try {
@@ -34,7 +59,7 @@ export default function Dashboard({ session }) {
   }
 
   async function handleDelete(id) {
-    if (!confirm('Are you sure you want to delete this game?')) return;
+    if (!confirm('Are you sure you want to delete this game from your vault?')) return;
     const { error } = await supabase.from('games').delete().eq('id', id);
     if (!error) fetchGames();
   }
@@ -45,117 +70,195 @@ export default function Dashboard({ session }) {
     return game.listing_type === filter; 
   });
 
-  // Helper for badge colors
-  const getBadgeStyle = (type) => {
-    switch(type) {
-      case 'Sale': return 'bg-green-600 text-white';
-      case 'Rent': return 'bg-blue-600 text-white';
-      case 'Rented Out': return 'bg-amber-600 text-white';
-      case 'Rented In': return 'bg-purple-600 text-white';
-      case 'Sold': return 'bg-slate-700 text-slate-300';
-      default: return 'bg-slate-800 text-slate-400 border border-slate-700';
-    }
+  // Derived Stats
+  const stats = {
+    total: games.length,
+    sale: games.filter(g => g.listing_type === 'Sale').length,
+    rent: games.filter(g => g.listing_type === 'Rent').length,
+    library: games.filter(g => g.listing_type === 'Library').length
   };
 
   return (
-    <div className="space-y-6 pb-80">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white">My Vault</h1>
-          <p className="text-slate-400 mt-1">Manage your personal collection</p>
-        </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition shadow-lg shadow-indigo-500/20"
-        >
-          <Plus size={20} /> Add Game
-        </button>
-      </div>
+    <>
+      {/* MAIN CONTENT WRAPPER */}
+      <div className="max-w-5xl mx-auto px-4 pb-40 animate-in fade-in duration-700">
+        
+        {/* 1. HERO / STATS HEADER */}
+        <div className="relative mb-10 py-8 px-6 md:px-10 rounded-[2rem] overflow-hidden bg-slate-900 border border-white/5 shadow-2xl">
+          {/* Background Effects */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      {/* Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {['All', 'Library', 'Rent', 'Sale', 'Rented In', 'Rented Out', 'Sold'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition border ${
-              filter === f 
-                ? 'bg-indigo-600 border-indigo-500 text-white' 
-                : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
-            }`}
-          >
-            {f === 'Library' ? 'Collection' : f}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid */}
-      {loading ? (
-        <div className="text-center py-20 text-slate-500 animate-pulse">Loading your vault...</div>
-      ) : filteredGames.length === 0 ? (
-        <div className="text-center py-20 bg-slate-900/50 rounded-xl border border-dashed border-slate-800">
-          <Gamepad2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-slate-300">No games found</h3>
-          <p className="text-slate-500">Add games to your collection to see them here.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredGames.map((game) => (
-            <div 
-              key={game.id} 
-              className={`group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:shadow-xl transition flex flex-col relative ${game.listing_type === 'Sold' ? 'opacity-75 grayscale-[50%]' : ''}`}
-            >
-              
-              {/* Image */}
-              <div className="aspect-video bg-slate-950 relative overflow-hidden">
-                {game.cover_url ? (
-                  <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-950">
-                    <Gamepad2 size={40} />
-                  </div>
-                )}
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white border border-white/10 uppercase">
-                  {game.platform}
-                </div>
-                
-                {/* Status Badge */}
-                <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide shadow-sm ${getBadgeStyle(game.listing_type)}`}>
-                  {game.listing_type === 'Library' ? 'Collection' : game.listing_type}
-                </div>
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 mb-1">
+                  My Vault
+                </h1>
+                <p className="text-slate-400 text-sm flex items-center gap-2">
+                  <Archive size={16} className="text-indigo-400"/> Manage your personal collection
+                </p>
               </div>
-
-              {/* Body */}
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-bold text-lg text-white truncate mb-1">{game.title}</h3>
-                
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-800/50">
-                   <div className="text-sm font-medium text-slate-300">
-                     {/* Dynamic Price Display */}
-                     {game.listing_type === 'Sale' && <span className="text-green-400">${game.price}</span>}
-                     {game.listing_type === 'Rent' && <span className="text-blue-400">${game.price}/wk</span>}
-                     {game.listing_type === 'Rented Out' && <span className="text-amber-500 flex items-center gap-1"><Clock size={14}/> On Loan</span>}
-                     {game.listing_type === 'Sold' && <span className="text-slate-500 flex items-center gap-1"><CheckCircle size={14}/> Sold</span>}
-                     {game.listing_type === 'Library' && <span className="text-slate-500">Vault</span>}
-                   </div>
-                   
-                   <div className="flex gap-2">
-                     <button onClick={() => setEditingGame(game)} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition" title="Edit Status">
-                       <Pencil size={16} />
-                     </button>
-                     <button onClick={() => handleDelete(game.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-md transition" title="Delete">
-                       <Trash2 size={16} />
-                     </button>
-                   </div>
+              
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="group bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transform hover:-translate-y-0.5 text-sm"
+              >
+                <div className="bg-white/20 p-1 rounded-md group-hover:rotate-90 transition duration-300">
+                  <Plus size={16} />
                 </div>
+                Add Game
+              </button>
+            </div>
+
+            {/* Quick Stats Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Total Games</p>
+                <p className="text-xl font-black text-white">{stats.total}</p>
+              </div>
+              <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                <p className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-1">For Rent</p>
+                <p className="text-xl font-black text-white">{stats.rent}</p>
+              </div>
+              <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-1">For Sale</p>
+                <p className="text-xl font-black text-white">{stats.sale}</p>
+              </div>
+              <div className="bg-slate-950/50 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Collection</p>
+                <p className="text-xl font-black text-white">{stats.library}</p>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      )}
 
-      {/* Modals */}
+        {/* 2. FILTERS (Evenly Spaced Grid - 7 Items) */}
+        <div className="sticky top-20 z-30 mb-8 bg-slate-950/80 backdrop-blur-lg p-2 rounded-2xl border border-white/5 shadow-2xl">
+          <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+            {['All', 'Library', 'Rent', 'Sale', 'Rented In', 'Rented Out', 'Sold'].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all border ${
+                  filter === f 
+                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                {f === 'Library' ? 'Collection' : f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. VAULT GRID */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="bg-slate-900 p-4 rounded-full animate-bounce">
+              <Gamepad2 size={32} className="text-indigo-500" />
+            </div>
+            <p className="text-slate-500 font-medium">Opening Vault...</p>
+          </div>
+        ) : filteredGames.length === 0 ? (
+          <div className="text-center py-24 bg-slate-900/30 rounded-[2rem] border border-dashed border-slate-800">
+            <div className="bg-slate-900 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 border border-slate-800 shadow-xl">
+              <LayoutGrid className="text-slate-600" size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">It's quiet here...</h3>
+            <p className="text-slate-500 max-w-sm mx-auto mb-6">Start building your legacy. Add games to your vault to track, rent, or sell them.</p>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="text-indigo-400 font-bold hover:text-indigo-300 transition"
+            >
+              + Add Game
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {filteredGames.map((game) => (
+              <div 
+                key={game.id} 
+                onClick={() => setSelectedGame(game)} // CLICK TO VIEW DETAILS
+                className={`group relative bg-slate-900 rounded-2xl overflow-hidden border border-white/5 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 cursor-pointer ${game.listing_type === 'Sold' ? 'opacity-60 grayscale' : ''}`}
+              >
+                
+                {/* Image Container (Poster Ratio) */}
+                <div className="aspect-[3/4] relative overflow-hidden bg-slate-950">
+                  {game.cover_url ? (
+                    <img src={game.cover_url} alt={game.title} className="w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-out" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-950">
+                      <Gamepad2 size={48} />
+                    </div>
+                  )}
+                  
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60 md:opacity-0 md:group-hover:opacity-80 transition duration-300" />
+
+                  {/* Status Badge */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md shadow-lg ${
+                        game.listing_type === 'Sale' ? 'bg-emerald-500/90 text-white border-emerald-400/30' :
+                        game.listing_type === 'Rent' ? 'bg-indigo-500/90 text-white border-indigo-400/30' :
+                        game.listing_type === 'Rented Out' ? 'bg-amber-500/90 text-white border-amber-400/30' :
+                        game.listing_type === 'Rented In' ? 'bg-purple-500/90 text-white border-purple-400/30' : // Added Rented In style
+                        game.listing_type === 'Sold' ? 'bg-slate-700/90 text-slate-300 border-slate-600/30' :
+                        'bg-slate-800/90 text-slate-300 border-slate-600/30'
+                      }`}>
+                        {game.listing_type === 'Library' ? 'Vault' : game.listing_type}
+                      </span>
+                  </div>
+
+                  {/* Platform Badge */}
+                  <div className="absolute top-2 left-2 z-10">
+                    <span className="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-black/60 text-slate-300 border border-white/10 backdrop-blur-md">
+                      {game.platform}
+                    </span>
+                  </div>
+
+                  {/* Hover Actions Overlay */}
+                  <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition duration-200 backdrop-blur-[2px]">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setEditingGame(game); }} 
+                      className="bg-white text-slate-900 px-5 py-2 rounded-full font-bold text-xs hover:bg-indigo-500 hover:text-white transition transform hover:scale-105 shadow-xl flex items-center gap-2"
+                    >
+                      <Pencil size={12} /> Edit
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(game.id); }} 
+                      className="bg-red-500/20 text-red-400 border border-red-500/50 px-5 py-2 rounded-full font-bold text-xs hover:bg-red-500 hover:text-white transition transform hover:scale-105 shadow-xl flex items-center gap-2"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
+                </div>
+
+                {/* Footer Info */}
+                <div className="p-3 bg-slate-900 border-t border-white/5 relative z-20">
+                  <h3 className="font-bold text-white text-sm truncate mb-1" title={game.title}>{game.title}</h3>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    {/* Dynamic Status Text */}
+                    <div className="font-medium">
+                      {game.listing_type === 'Sale' && <span className="text-emerald-400 flex items-center gap-1"><DollarSign size={12}/> ${game.price}</span>}
+                      {game.listing_type === 'Rent' && <span className="text-indigo-400 flex items-center gap-1"><Activity size={12}/> ${game.price}/wk</span>}
+                      {game.listing_type === 'Rented Out' && <span className="text-amber-500 flex items-center gap-1"><Clock size={12}/> Away</span>}
+                      {game.listing_type === 'Rented In' && <span className="text-purple-400 flex items-center gap-1"><ArrowDownCircle size={12}/> Borrowed</span>}
+                      {game.listing_type === 'Sold' && <span className="text-slate-500 flex items-center gap-1"><CheckCircle size={12}/> History</span>}
+                      {game.listing_type === 'Library' && <span className="text-slate-500">Collection</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
+
+      {/* --- MODALS MOVED OUTSIDE THE ANIMATED CONTAINER --- */}
+      
       <AddGameModal 
         isOpen={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)} 
@@ -170,6 +273,73 @@ export default function Dashboard({ session }) {
           onGameUpdated={fetchGames}
         />
       )}
-    </div>
+
+      {/* GAME DETAILS MODAL */}
+      {selectedGame && (
+        // PORTAL to body to ensure it's on top
+        createPortal(
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-slate-900 w-full max-w-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+              
+              <button 
+                onClick={() => setSelectedGame(null)} 
+                className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-slate-800 rounded-full text-white transition"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Left: Cover Art */}
+              <div className="w-full md:w-1/2 h-64 md:h-auto bg-black relative">
+                {selectedGame.cover_url ? (
+                  <img src={selectedGame.cover_url} alt={selectedGame.title} className="w-full h-full object-cover opacity-80" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-700"><Gamepad2 size={64} /></div>
+                )}
+              </div>
+
+              {/* Right: Details */}
+              <div className="w-full md:w-1/2 p-8 flex flex-col bg-slate-900">
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      selectedGame.listing_type === 'Sale' ? 'bg-green-500/20 text-green-400 border border-green-500/50' : 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
+                    }`}>
+                      {selectedGame.listing_type}
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">{selectedGame.platform}</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white leading-tight mb-2">{selectedGame.title}</h2>
+                  {selectedGame.price > 0 && (
+                    <p className="text-2xl font-bold text-indigo-400">
+                      ${selectedGame.price}
+                      {selectedGame.listing_type === 'Rent' && <span className="text-sm text-slate-500 font-medium ml-1">/week</span>}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-auto bg-slate-950/50 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Owner" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center font-bold text-white bg-indigo-600">
+                          {profile?.username?.[0] || "Me"}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">Stored in Vault</p>
+                      <p className="text-xs text-slate-500">Owned by You</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      )}
+    </>
   );
 }

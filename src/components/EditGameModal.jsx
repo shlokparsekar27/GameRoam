@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Calendar, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -74,9 +75,9 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
     }
   }
 
-  return (
-    // UPDATED: z-[100] to cover navbar
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+  // PORTAL: Teleports this UI to document.body
+  return createPortal(
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
       <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
@@ -112,7 +113,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                 placeholder="Click the magic wand to auto-fill →"
               />
               
-              {/* MOVED: Magic Wand Button Here */}
+              {/* Magic Wand Button */}
               <button
                 type="button"
                 onClick={fetchGameCover}
@@ -237,6 +238,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body // <--- RENDER TO BODY
   );
 }

@@ -320,7 +320,7 @@ export default function UserProfile({ session }) {
                     onClick={() => navigate(`/chat/${userId}`)}
                     className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/20"
                   >
-                    <MessageCircle size={18} /> Chat with Seller
+                    <MessageCircle size={18} /> Start Chat
                   </button>
                 )}
               </div>
