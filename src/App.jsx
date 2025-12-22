@@ -12,8 +12,11 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Marketplace from './pages/Marketplace';
 import UserProfile from './pages/UserProfile';
-import Chat from './pages/Chat';
 import ChatPage from './pages/ChatPage';
+import Community from './pages/Community';
+import CommunityFeed from './pages/CommunityFeed';
+import PostDetails from './pages/PostDetails';
+import ViewPost from './pages/ViewPost';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -89,6 +92,15 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/chat" element={<ChatPage session={session} />} />
             <Route path="/chat/:receiverId" element={<ChatPage session={session} />} />
+            <Route path="/community" element={<Community session={session} />} />
+            <Route path="/community" element={<Community session={session} />} />
+            <Route path="/community/post/:postId" element={<PostDetails session={session} />} />
+            <Route path="/community" element={<Community session={session} />} />
+            {/* Use the new component here */}
+            <Route path="/community/post/:postId" element={<ViewPost session={session} />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/community/feed" element={<CommunityFeed session={session} />} />
+            <Route path="/community/post/:postId" element={<ViewPost session={session} />} />
           </Routes>
         </div>
       </div>

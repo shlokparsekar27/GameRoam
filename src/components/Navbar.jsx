@@ -23,6 +23,7 @@ export default function Navbar({ session, profile }) {
           {/* DESKTOP Navigation (Hidden on Mobile) */}
           <div className="hidden md:flex items-center gap-8">
             <Link to="/marketplace" className="text-slate-300 hover:text-white font-medium transition">Marketplace</Link>
+            <Link to="/community" className="text-slate-300 hover:text-white font-medium transition">Community</Link>
             <Link to="/" className="text-slate-300 hover:text-white font-medium transition">My Vault</Link>
             <Link to="/chat" className="text-slate-300 hover:text-white font-medium transition flex items-center gap-2">
               <MessageCircle size={20} />
@@ -73,6 +74,15 @@ export default function Navbar({ session, profile }) {
             >
               Marketplace
             </Link>
+
+            <Link 
+            to="/community" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800"
+             >
+              Community
+            </Link>
+
             <Link 
               to="/" 
               onClick={() => setIsMobileMenuOpen(false)}
