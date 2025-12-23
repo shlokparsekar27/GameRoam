@@ -23,17 +23,22 @@ export default function PostDetails({ session }) {
   
   // User Profile State
   const [myProfile, setMyProfile] = useState(null);
-  const commentsEndRef = useRef(null);
+  
+  // UPDATED: Ref for the SCROLL CONTAINER (not the bottom element)
+  const commentsContainerRef = useRef(null);
 
   const myId = session.user.id;
   const fallbackName = session.user.email.split('@')[0];
 
   useEffect(() => {
+    // 1. FIX: Always start at the top of the page (The Post)
+    window.scrollTo(0, 0);
+
     fetchMyProfile();
     fetchPostAndComments();
     fetchLikeStatus();
 
-    // Realtime subscription for comments and likes
+    // Realtime subscription
     const channel = supabase.channel(`post_details:${postId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_comments', filter: `post_id=eq.${postId}` }, (payload) => {
         fetchSingleComment(payload.new.id);
@@ -46,12 +51,14 @@ export default function PostDetails({ session }) {
     return () => { supabase.removeChannel(channel); };
   }, [postId]);
 
-  // Scroll to bottom whenever comments update
+  // 2. FIX: Scroll ONLY the comment box to the bottom (Latest Message)
   useEffect(() => {
-    if (comments.length > 0) {
-      commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (comments.length > 0 && commentsContainerRef.current) {
+      const container = commentsContainerRef.current;
+      // Immediately set the scroll position to the bottom
+      container.scrollTop = container.scrollHeight;
     }
-  }, [comments.length]);
+  }, [comments.length, comments]);
 
   async function fetchMyProfile() {
     const { data } = await supabase.from('profiles').select('*').eq('id', myId).single();
@@ -70,6 +77,7 @@ export default function PostDetails({ session }) {
       setPost(postData);
       setLikesCount(postData.likes_count || 0);
 
+      // "Chat Order": Oldest first, so newest is at the bottom (Standard Chat UI)
       const { data: commentsData } = await supabase
         .from('community_comments')
         .select('*, author:profiles(id, username, avatar_url)')
@@ -101,7 +109,6 @@ export default function PostDetails({ session }) {
     setTogglingLike(true);
 
     const previousLiked = isLiked;
-    // Optimistic UI Update
     setIsLiked(!previousLiked);
     setLikesCount(prev => previousLiked ? Math.max(0, prev - 1) : prev + 1);
 
@@ -114,8 +121,6 @@ export default function PostDetails({ session }) {
         await supabase.rpc('increment_likes', { row_id: postId });
       }
     } catch (error) {
-      // Revert on error
-      console.error(error);
       setIsLiked(previousLiked);
       setLikesCount(prev => previousLiked ? prev + 1 : Math.max(0, prev - 1));
     } finally {
@@ -215,8 +220,13 @@ export default function PostDetails({ session }) {
         {/* Unified Box for List + Input */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden flex flex-col">
           
-          {/* 1. SCROLLABLE COMMENT LIST */}
-          <div className="h-[500px] overflow-y-auto p-4 space-y-6 custom-scrollbar">
+          {/* 1. SCROLLABLE COMMENT LIST 
+              Ref attached here to control internal scrolling
+          */}
+          <div 
+            ref={commentsContainerRef}
+            className="h-[500px] overflow-y-auto p-4 space-y-6 custom-scrollbar scroll-smooth"
+          >
             {comments.length === 0 && (
                <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50">
                   <MessageSquare size={48} className="mb-2"/>
@@ -239,7 +249,6 @@ export default function PostDetails({ session }) {
                   {/* Comment Bubble */}
                   <div className={`flex-1 max-w-[80%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                     
-                    {/* UPDATED: Username is now clickable */}
                     <div className="flex items-center gap-2 mb-1 px-1">
                       <span 
                         onClick={() => navigate(isMe ? '/profile' : `/user/${c.user_id}`)}
@@ -255,7 +264,6 @@ export default function PostDetails({ session }) {
                       
                       <p>{c.content}</p>
 
-                      {/* Delete Button (Only on hover) */}
                       {isMe && (
                         <button 
                           onClick={() => handleDeleteComment(c.id)} 
@@ -269,15 +277,12 @@ export default function PostDetails({ session }) {
                 </div>
               );
             })}
-            {/* Scroll Anchor */}
-            <div ref={commentsEndRef} />
           </div>
 
           {/* 2. INTEGRATED INPUT AREA (Bottom of the box) */}
           <div className="p-4 bg-slate-950/50 border-t border-slate-800">
             <div className="flex gap-4 items-center">
                
-               {/* UPDATED: Dynamic User Avatar */}
                <div className="w-10 h-10 rounded-full bg-indigo-600 hidden md:flex items-center justify-center font-bold text-white border border-slate-700 shrink-0 overflow-hidden">
                  {myProfile?.avatar_url ? (
                    <img src={myProfile.avatar_url} alt="Me" className="w-full h-full object-cover" />
