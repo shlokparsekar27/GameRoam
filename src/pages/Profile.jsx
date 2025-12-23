@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { 
-  MapPin, Edit2, Save, X, Camera, Loader2, Grid, Archive, Heart, MessageSquare, Gamepad2, Settings, LogOut, Phone 
+  MapPin, Edit2, Save, X, Camera, Loader2, Grid, Archive, Heart, MessageSquare, Gamepad2, Settings, LogOut, Phone, Quote 
 } from 'lucide-react';
 
 export default function Profile({ session, initialProfile, onProfileUpdate }) {
@@ -25,7 +25,8 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
     username: '',
     phone_number: '',
     location: '',
-    avatar_url: ''
+    avatar_url: '',
+    bio: '' // Added Bio
   });
 
   useEffect(() => {
@@ -35,7 +36,8 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
         username: initialProfile.username || '',
         phone_number: initialProfile.phone_number || '',
         location: initialProfile.location || '',
-        avatar_url: initialProfile.avatar_url || ''
+        avatar_url: initialProfile.avatar_url || '',
+        bio: initialProfile.bio || '' // Load Bio
       });
       fetchMyContent();
     }
@@ -119,7 +121,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
           <div className="flex-1 text-center md:text-left w-full">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
               
-              {/* Name & Edit Inputs */}
+              {/* Name & Stats */}
               <div className="flex-1">
                 {isEditing ? (
                   <input 
@@ -162,43 +164,62 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
             </div>
 
             {/* Bio / Contact Details */}
-            <div className="space-y-2 max-w-lg mx-auto md:mx-0 text-sm">
+            <div className="space-y-3 max-w-lg mx-auto md:mx-0 text-sm">
                <div className="inline-flex items-center gap-2 text-slate-400 bg-slate-900/50 px-3 py-1 rounded-md border border-white/5">
                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> {session.user.email}
                </div>
                
                {isEditing ? (
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                   <div className="relative">
-                     <MapPin className="absolute left-3 top-2.5 text-slate-500" size={14}/>
-                     <input 
-                       value={formData.location} 
-                       onChange={e => setFormData({...formData, location: e.target.value})}
-                       placeholder="Location"
-                       className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
-                     />
+                 <div className="grid grid-cols-1 gap-3 mt-2">
+                   <div className="grid grid-cols-2 gap-2">
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-2.5 text-slate-500" size={14}/>
+                        <input 
+                          value={formData.location} 
+                          onChange={e => setFormData({...formData, location: e.target.value})}
+                          placeholder="Location"
+                          className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
+                        />
+                      </div>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-2.5 text-slate-500" size={14}/>
+                        <input 
+                          value={formData.phone_number} 
+                          onChange={e => setFormData({...formData, phone_number: e.target.value})}
+                          placeholder="Phone Number"
+                          className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
+                        />
+                      </div>
                    </div>
-                   <div className="relative">
-                     <Phone className="absolute left-3 top-2.5 text-slate-500" size={14}/>
-                     <input 
-                       value={formData.phone_number} 
-                       onChange={e => setFormData({...formData, phone_number: e.target.value})}
-                       placeholder="Phone Number"
-                       className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
-                     />
-                   </div>
+                   
+                   {/* Bio Textarea */}
+                   <textarea
+                      value={formData.bio}
+                      onChange={e => setFormData({...formData, bio: e.target.value})}
+                      placeholder="Your bio... (e.g. Steam ID, Twitch, favorite quotes)"
+                      className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-indigo-500 outline-none resize-none h-20 text-sm"
+                   />
                  </div>
                ) : (
-                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-1">
-                    {profile?.location && (
-                      <p className="text-indigo-300 font-medium flex items-center gap-1.5">
-                        <MapPin size={14} /> {profile.location}
-                      </p>
-                    )}
-                    {profile?.phone_number && (
-                      <p className="text-slate-400 font-medium flex items-center gap-1.5">
-                        <Phone size={14} /> {profile.phone_number}
-                      </p>
+                 <div className="space-y-3 mt-1">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                        {profile?.location && (
+                          <p className="text-indigo-300 font-medium flex items-center gap-1.5">
+                            <MapPin size={14} /> {profile.location}
+                          </p>
+                        )}
+                        {profile?.phone_number && (
+                          <p className="text-slate-400 font-medium flex items-center gap-1.5">
+                            <Phone size={14} /> {profile.phone_number}
+                          </p>
+                        )}
+                    </div>
+                    
+                    {/* Display Bio */}
+                    {profile?.bio && (
+                      <div className="flex gap-2 text-slate-400 italic bg-white/5 p-3 rounded-lg border border-white/5">
+                        <p className="leading-relaxed">{profile.bio}</p>
+                      </div>
                     )}
                  </div>
                )}
@@ -303,13 +324,12 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
 
                 {/* Footer Info */}
                 <div className="p-3 bg-slate-900 border-t border-white/5">
-                  <h3 className="text-sm font-bold text-white truncate mb-1">{game.title}</h3>
+                  <h3 className="text-m font-bold text-white truncate mb-1">{game.title}</h3>
                   <div className="flex justify-between items-center text-s">
                      <span className="text-slate-500">{game.platform}</span>
                      {game.price > 0 && (
                        <span className="text-indigo-400 font-bold">
                          ${game.price}
-                         {/* UPDATED: Add /wk for Rent listings */}
                          {game.listing_type === 'Rent' && <span className="text-[12px] text-slate-500 font-normal ml-0.5">/wk</span>}
                        </span>
                      )}

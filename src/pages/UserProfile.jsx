@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  MapPin, Calendar, Loader2, Grid, Archive, Heart, MessageCircle, Phone, Gamepad2, X, Camera 
+  MapPin, Calendar, Loader2, Grid, Archive, Heart, MessageCircle, Phone, Gamepad2, X, Camera, Quote, 
+  BiohazardIcon
 } from 'lucide-react';
 
 export default function UserProfile({ session }) {
@@ -126,8 +127,8 @@ export default function UserProfile({ session }) {
               )}
             </div>
 
-            {/* Details (Location, Phone, Joined) */}
-            <div className="space-y-2 max-w-lg mx-auto md:mx-0 text-sm">
+            {/* Details (Location, Phone, Bio) */}
+            <div className="space-y-3 max-w-lg mx-auto md:mx-0 text-sm">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-1">
                     {profile.location && (
                       <p className="text-indigo-300 font-medium flex items-center gap-1.5">
@@ -143,6 +144,13 @@ export default function UserProfile({ session }) {
                        <Calendar size={14} /> Joined {new Date(profile.created_at || Date.now()).toLocaleDateString()}
                     </p>
                 </div>
+
+                {/* Display Bio */}
+                {profile.bio && (
+                  <div className="flex gap-2 text-slate-400 italic bg-white/5 p-3 rounded-lg border border-white/5">
+                    <p className="leading-relaxed">{profile.bio}</p>
+                  </div>
+                )}
             </div>
           </div>
         </div>
@@ -242,13 +250,12 @@ export default function UserProfile({ session }) {
 
                 {/* Footer Info */}
                 <div className="p-3 bg-slate-900 border-t border-white/5">
-                  <h3 className="text-sm font-bold text-white truncate mb-1">{game.title}</h3>
+                  <h3 className="text-m font-bold text-white truncate mb-1">{game.title}</h3>
                   <div className="flex justify-between items-center text-s">
                      <span className="text-slate-500">{game.platform}</span>
                      {game.price > 0 && (
                        <span className="text-indigo-400 font-bold">
                          ${game.price}
-                         {/* UPDATED: Add /wk for Rent listings */}
                          {game.listing_type === 'Rent' && <span className="text-[12px] text-slate-500 font-normal ml-0.5">/wk</span>}
                        </span>
                      )}
@@ -275,7 +282,7 @@ export default function UserProfile({ session }) {
               )}
             </div>
 
-            <div className="w-full md:w-1/2 p-8 flex flex-col bg-slate-900">
+            <div className="w-full md:w-1/2 p-8 flex flex-col">
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -288,22 +295,27 @@ export default function UserProfile({ session }) {
                   </span>
                 </div>
                 <h2 className="text-2xl font-bold text-white leading-tight mb-2">{selectedGame.title}</h2>
-                {selectedGame.price > 0 && (
-                  <p className="text-2xl font-bold text-indigo-400">
-                    ${selectedGame.price}
-                    {selectedGame.listing_type === 'Rent' && <span className="text-sm text-slate-500 font-medium ml-1">/week</span>}
-                  </p>
-                )}
+                <p className="text-3xl font-extrabold text-indigo-400">
+                  ${selectedGame.price}<span className="text-lg text-slate-500 font-medium">{selectedGame.listing_type === 'Rent' && '/week'}</span>
+                </p>
               </div>
 
-              <div className="mt-auto bg-slate-950/50 rounded-xl p-4 border border-white/5">
+              <div className="mb-8">
+                <h3 className="text-xs font-bold uppercase text-slate-500 mb-2">About this listing</h3>
+                <p className="text-slate-300 text-sm leading-relaxed">
+                  {selectedGame.title} is available for {selectedGame.listing_type.toLowerCase()}! 
+                  Listed in {selectedGame.platform} format.
+                </p>
+              </div>
+
+              <div className="mt-auto bg-slate-950/50 rounded-xl p-4 border border-slate-800">
                 <div className="flex items-center gap-3 mb-4 p-2 -m-2 rounded-lg">
                   <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
-                    {profile?.avatar_url ? (
+                    {profile.avatar_url ? (
                       <img src={profile.avatar_url} alt="Owner" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white bg-indigo-600">
-                        {profile?.username?.[0]?.toUpperCase()}
+                        {profile.username?.[0]?.toUpperCase()}
                       </div>
                     )}
                   </div>

@@ -105,7 +105,7 @@ export default function Dashboard({ session }) {
   return (
     <>
       {/* MAIN CONTENT WRAPPER */}
-      <div className="max-w-5xl mx-auto px-4 pt-10 pb-40 animate-in fade-in duration-700">
+      <div className="max-w-5xl mx-auto px-4 pb-40 animate-in fade-in duration-700">
         
         {/* 1. HERO / STATS HEADER */}
         <div className="relative mb-10 py-8 px-6 md:px-10 rounded-[2rem] overflow-hidden bg-slate-900 border border-white/5 shadow-2xl">
@@ -270,11 +270,11 @@ export default function Dashboard({ session }) {
                   <div className="flex items-center justify-between text-xs">
                     {/* Dynamic Status Text */}
                     <div className="font-medium">
-                      {game.listing_type === 'Sale' && <span className="text-emerald-400 flex items-center gap-1"><DollarSign size={12}/> ${game.price}</span>}
-                      {game.listing_type === 'Rent' && <span className="text-indigo-400 flex items-center gap-1"><Activity size={12}/> ${game.price}/wk</span>}
-                      {game.listing_type === 'Rented Out' && <span className="text-amber-500 flex items-center gap-1"><Clock size={12}/> Away</span>}
-                      {game.listing_type === 'Rented In' && <span className="text-purple-400 flex items-center gap-1"><ArrowDownCircle size={12}/> Borrowed</span>}
-                      {game.listing_type === 'Sold' && <span className="text-slate-500 flex items-center gap-1"><CheckCircle size={12}/> History</span>}
+                      {game.listing_type === 'Sale' && <span className="text-emerald-400 flex items-center gap-1"><DollarSign size={15}/> ${game.price}</span>}
+                      {game.listing_type === 'Rent' && <span className="text-indigo-400 flex items-center gap-1"><Activity size={15}/> ${game.price}/wk</span>}
+                      {game.listing_type === 'Rented Out' && <span className="text-amber-500 flex items-center gap-1"><Clock size={15}/> Away</span>}
+                      {game.listing_type === 'Rented In' && <span className="text-purple-400 flex items-center gap-1"><ArrowDownCircle size={15}/> Borrowed</span>}
+                      {game.listing_type === 'Sold' && <span className="text-slate-500 flex items-center gap-1"><CheckCircle size={15}/> History</span>}
                       {game.listing_type === 'Library' && <span className="text-slate-500">Collection</span>}
                     </div>
                   </div>
