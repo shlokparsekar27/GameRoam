@@ -3,7 +3,7 @@ import { Gavel, AlertTriangle, UserCheck, ShieldAlert } from 'lucide-react';
 export default function Terms() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 text-slate-300 animate-in fade-in duration-500">
-      
+
       {/* Header */}
       <div className="mb-12 border-b border-slate-800 pb-8">
         <h1 className="text-4xl font-extrabold text-white mb-4">Terms & Conditions</h1>
@@ -14,11 +14,11 @@ export default function Terms() {
       </div>
 
       <div className="space-y-12">
-        
+
         {/* Section 1 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <UserCheck className="text-indigo-500" size={24}/> 1. User Responsibilities
+            <UserCheck className="text-indigo-500" size={24} /> 1. User Responsibilities
           </h2>
           <p>By creating an account, you agree that:</p>
           <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
@@ -32,7 +32,7 @@ export default function Terms() {
         {/* Section 2 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Gavel className="text-indigo-500" size={24}/> 2. Marketplace & Trading Rules
+            <Gavel className="text-indigo-500" size={24} /> 2. Marketplace & Trading Rules
           </h2>
           <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
             <p className="mb-4 text-white font-medium">GameRoam acts as a venue for users to connect. We are not a direct party to transactions.</p>
@@ -48,7 +48,7 @@ export default function Terms() {
         {/* Section 3 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <AlertTriangle className="text-indigo-500" size={24}/> 3. Content Guidelines
+            <AlertTriangle className="text-indigo-500" size={24} /> 3. Content Guidelines
           </h2>
           <p>
             GameRoam encourages open discussion in "The Village", but we have zero tolerance for:
@@ -66,7 +66,7 @@ export default function Terms() {
         {/* Section 4 */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ShieldAlert className="text-indigo-500" size={24}/> 4. Limitation of Liability
+            <ShieldAlert className="text-indigo-500" size={24} /> 4. Limitation of Liability
           </h2>
           <p>
             To the fullest extent permitted by law, GameRoam shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service or any interactions with other users of the service.
