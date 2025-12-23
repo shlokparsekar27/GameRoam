@@ -62,7 +62,7 @@ export default function Auth() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-10">
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
-            GameRoam <span className="text-indigo-500">.</span>
+            Game<span className="text-indigo-500">Roam</span>
           </h1>
           <p className="text-slate-400 text-sm font-medium tracking-widest uppercase">
             {isSignUp ? "Join the Vault" : "Welcome Back"}
