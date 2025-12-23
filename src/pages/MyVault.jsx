@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Plus, Gamepad2, Pencil, Trash2, Clock, CheckCircle, 
-  Archive, DollarSign, Activity, LayoutGrid, X, MapPin, ArrowDownCircle 
+  Archive, DollarSign, Activity, LayoutGrid, X, ArrowDownCircle 
 } from 'lucide-react';
 import { createPortal } from 'react-dom'; 
 import AddGameModal from '../components/AddGameModal';
