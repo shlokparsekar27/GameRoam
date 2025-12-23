@@ -26,7 +26,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
     phone_number: '',
     location: '',
     avatar_url: '',
-    bio: '' // Added Bio
+    bio: '' 
   });
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
         phone_number: initialProfile.phone_number || '',
         location: initialProfile.location || '',
         avatar_url: initialProfile.avatar_url || '',
-        bio: initialProfile.bio || '' // Load Bio
+        bio: initialProfile.bio || '' 
       });
       fetchMyContent();
     }
@@ -53,8 +53,13 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
     } catch (error) { console.error(error); }
   }
 
+  // --- UPDATED LOGOUT FUNCTION ---
   const handleLogout = async () => {
     if (confirm("Are you sure you want to log out?")) {
+      // 1. Navigate to home first to clean up the URL (e.g. remove /profile)
+      navigate('/');
+      
+      // 2. Then sign out. This triggers App.jsx to switch to <Auth />
       await supabase.auth.signOut();
     }
   };
