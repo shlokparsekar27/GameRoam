@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'; // <--- Import Link
 import { Gamepad2, Users, ArrowRightLeft, Shield, Globe, Zap, Heart, ShoppingBag, Archive, MessageCircle, UserCircle, MapPin } from 'lucide-react';
 
 export default function About() {
@@ -17,7 +18,7 @@ export default function About() {
         </p>
       </div>
 
-      {/* 2. FEATURE BREAKDOWN (The Ecosystem) */}
+      {/* 2. FEATURE BREAKDOWN (Clickable Cards) */}
       <div className="space-y-10">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white">Explore the Ecosystem</h2>
@@ -26,34 +27,34 @@ export default function About() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Marketplace */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition duration-300 group">
+          {/* Marketplace Link */}
+          <Link to="/marketplace" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition duration-300 group hover:bg-slate-900/60 block">
             <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
               <ShoppingBag size={24} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">The Marketplace</h3>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">The Marketplace</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Buy, sell, or trade physical games directly with locals. Filter by platform, price, or location. No hidden fees, just pure peer-to-peer trading.
             </p>
-          </div>
+          </Link>
 
-          {/* The Village */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-pink-500/50 transition duration-300 group">
+          {/* The Village Link */}
+          <Link to="/community" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-pink-500/50 transition duration-300 group hover:bg-slate-900/60 block">
             <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center text-pink-400 mb-4 group-hover:scale-110 transition">
               <Users size={24} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">The Village</h3>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-pink-400 transition">The Village</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Our community hub. Share your latest achievements, ask for game recommendations, or find a squad. It’s social media, but strictly for gamers.
             </p>
-          </div>
+          </Link>
 
-          {/* My Vault */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition duration-300 group">
+          {/* My Vault Link */}
+          <Link to="/vault" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition duration-300 group hover:bg-slate-900/60 block">
             <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
               <Archive size={24} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">My Vault</h3>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition">My Vault</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Your personal inventory management system.
             </p>
@@ -62,31 +63,31 @@ export default function About() {
               <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> <b>Sale:</b> List items for cash.</li>
               <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> <b>Rent:</b> Lend games for weekly income.</li>
             </ul>
-          </div>
+          </Link>
 
-          {/* Messages */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 transition duration-300 group">
+          {/* Messages Link */}
+          <Link to="/chat" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 transition duration-300 group hover:bg-slate-900/60 block">
             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition">
               <MessageCircle size={24} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Secure Chat</h3>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition">Secure Chat</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Negotiate prices, arrange safe meetup spots, or just chat about games. Share images and videos directly within the conversation.
             </p>
-          </div>
+          </Link>
 
-          {/* Profile */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-purple-500/50 transition duration-300 group">
+          {/* Profile Link */}
+          <Link to="/profile" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-purple-500/50 transition duration-300 group hover:bg-slate-900/60 block">
             <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
               <UserCircle size={24} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Your Identity</h3>
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition">Your Identity</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
               Build your reputation. Your profile showcases your public vault, your "Gamer Bio", and your standing in the community.
             </p>
-          </div>
+          </Link>
 
-          {/* Location Based */}
+          {/* Location Based (No Link, just info) */}
           <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-orange-500/50 transition duration-300 group">
             <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-400 mb-4 group-hover:scale-110 transition">
               <MapPin size={24} />
@@ -100,7 +101,7 @@ export default function About() {
         </div>
       </div>
 
-      {/* 3. MISSION & VISION GRID */}
+      {/* 3. MISSION & VISION GRID (Unchanged from here down) */}
       <div className="grid md:grid-cols-2 gap-8 pt-10 border-t border-slate-800/50">
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-10 flex flex-col justify-center">
           <h2 className="text-3xl font-bold text-white mb-6">Our Mission</h2>

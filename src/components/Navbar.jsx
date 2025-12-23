@@ -8,7 +8,6 @@ export default function Navbar({ session, profile }) {
   const displayName = profile?.username || session.user.email.split('@')[0];
   const avatarUrl = profile?.avatar_url;
 
-  // Helper function to keep classes clean
   const getNavLinkClass = ({ isActive }) => 
     `font-medium transition ${
       isActive 
@@ -28,19 +27,20 @@ export default function Navbar({ session, profile }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Logo - UPDATED: Now links to /marketplace */}
-          <Link to="/about" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
+          {/* Logo links to Home (About) */}
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
             <Gamepad2 className="w-8 h-8 text-indigo-500" />
             <span>
               Game<span className="text-indigo-500">Roam</span>
             </span>
           </Link>
 
-          {/* DESKTOP Navigation (Highlighted when active) */}
+          {/* DESKTOP Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <NavLink to="/marketplace" className={getNavLinkClass}>Marketplace</NavLink>
             <NavLink to="/community" className={getNavLinkClass}>Community</NavLink>
-            <NavLink to="/" className={getNavLinkClass}>My Vault</NavLink>
+            {/* UPDATED LINK */}
+            <NavLink to="/vault" className={getNavLinkClass}>My Vault</NavLink>
             <NavLink to="/chat" className={({ isActive }) => `${getNavLinkClass({ isActive })} flex items-center gap-2`}>
               <MessageCircle size={20} />
               <span>Messages</span>
@@ -85,7 +85,7 @@ export default function Navbar({ session, profile }) {
         </div>
       </div>
 
-      {/* MOBILE MENU DROPDOWN (Highlighted when active) */}
+      {/* MOBILE MENU DROPDOWN */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-slate-900 border-b border-slate-800 animate-in slide-in-from-top-5">
           <div className="px-4 pt-2 pb-4 space-y-2">
@@ -97,7 +97,8 @@ export default function Navbar({ session, profile }) {
               Community
             </NavLink>
 
-            <NavLink to="/" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
+            {/* UPDATED LINK */}
+            <NavLink to="/vault" onClick={() => setIsMobileMenuOpen(false)} className={getMobileNavLinkClass}>
               My Vault
             </NavLink>
             

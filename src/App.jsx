@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import Auth from './components/Auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from './components/ScrollToTop'; 
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -18,7 +18,6 @@ import ChatPage from './pages/ChatPage';
 import Community from './pages/Community';
 import CommunityFeed from './pages/CommunityFeed';
 import PostDetails from './pages/PostDetails';
-
 import About from './pages/About';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -71,33 +70,38 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      {/* 1. FLEX WRAPPER: min-h-screen + flex-col ensures full height */}
+      
       <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col">
-        
         <Navbar session={session} profile={userProfile} />
         
-        {/* 2. MAIN CONTENT: flex-1 forces this div to grow and push Footer down */}
         <div className="max-w-7xl mx-auto p-6 md:p-12 w-full flex-1">
           <Routes>
-            <Route path="/" element={<Dashboard session={session} />} />
+            {/* 1. CHANGED: Root path now points to About */}
+            <Route path="/" element={<About />} />
+            
+            {/* 2. NEW: Moved Dashboard to /vault */}
+            <Route path="/vault" element={<Dashboard session={session} />} />
+            
             <Route path="/profile" element={<Profile session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
             <Route path="/marketplace" element={<Marketplace session={session} />} />
             <Route path="/user/:userId" element={<UserProfile session={session} />} />
+            
+            {/* Redirect catch-all to Home (About) */}
             <Route path="*" element={<Navigate to="/" />} />
+            
             <Route path="/chat" element={<ChatPage session={session} />} />
             <Route path="/chat/:receiverId" element={<ChatPage session={session} />} />
             <Route path="/community" element={<Community session={session} />} />
             <Route path="/community/feed" element={<CommunityFeed session={session} />} />
             <Route path="/community/post/:postId" element={<PostDetails session={session} />} />
-            <Route path="/about" element={<About />} />
+            
+            {/* Removed separate /about route since it is now root */}
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
           </Routes>
         </div>
 
-        {/* 3. FOOTER: Always sits at the bottom now */}
         <Footer />
-        
       </div>
     </Router>
   );
