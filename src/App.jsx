@@ -9,15 +9,14 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 // Pages
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Marketplace from './pages/Marketplace';
+import Dashboard from './pages/MyVault';
+import Profile from './pages/Profiles';
+import Marketplace from './pages/Market';
 import UserProfile from './pages/UserProfile';
 import ChatPage from './pages/ChatPage';
 import Community from './pages/Community';
 import CommunityFeed from './pages/CommunityFeed';
 import PostDetails from './pages/PostDetails';
-import ViewPost from './pages/ViewPost';
 
 import About from './pages/About';
 import Privacy from './pages/Privacy';
