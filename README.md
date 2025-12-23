@@ -49,7 +49,7 @@ To get a local copy of this project up and running on your machine, follow these
 * You will need a free [Supabase](https://supabase.io/) account.
 * You will need a free API Key from [RAWG.io](https://rawg.io/apidocs).
 
-### Installation (from a Mac perspective)
+### Installation
 
 1.  **Clone the repository:**
     ```bash
