@@ -12,7 +12,7 @@ export default function Footer() {
 
                     {/* COLUMN 1: BRAND & MISSION */}
                     <div className="space-y-4">
-                        <Link to="/" className="flex items-center gap-2 text-white font-extrabold text-2xl tracking-tight">
+                        <Link to="/about" className="flex items-center gap-2 text-white font-extrabold text-2xl tracking-tight">
                             <Gamepad2 className="text-indigo-500" size={28} />
                             <span>
                                 Game<span className="text-indigo-500">Roam</span>

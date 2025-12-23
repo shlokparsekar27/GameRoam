@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Send, Paperclip, Loader2, Trash2, Check, CheckCheck, MoreVertical, ArrowLeft, XCircle } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // --- MEDIA COMPONENT ---
-const MediaMessage = ({ path }) => {
+// 1. CHANGED: Added 'onLoaded' prop to trigger scroll when image/video is ready
+const MediaMessage = ({ path, onLoaded }) => {
   const [mediaUrl, setMediaUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,9 +27,20 @@ const MediaMessage = ({ path }) => {
 
   const isVideo = path.match(/\.(mp4|webm|ogg)$/i);
   return isVideo ? (
-    <video src={mediaUrl} controls className="max-w-full max-h-[250px] rounded-lg mt-2 bg-black/20" />
+    <video 
+      src={mediaUrl} 
+      controls 
+      className="max-w-full max-h-[250px] rounded-lg mt-2 bg-black/20"
+      onLoadedData={onLoaded} // <--- Trigger scroll when video metadata loads
+    />
   ) : (
-    <img src={mediaUrl} alt="Shared" className="max-w-full max-h-[250px] rounded-lg mt-2 cursor-pointer object-cover" onClick={() => window.open(mediaUrl)} />
+    <img 
+      src={mediaUrl} 
+      alt="Shared" 
+      className="max-w-full max-h-[250px] rounded-lg mt-2 cursor-pointer object-cover" 
+      onClick={() => window.open(mediaUrl)} 
+      onLoad={onLoaded} // <--- Trigger scroll when image loads
+    />
   );
 };
 
@@ -42,7 +54,7 @@ export default function Chat({ session }) {
   const [uploading, setUploading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null); 
   const fileInputRef = useRef(null);
   const myId = session.user.id;
 
@@ -64,8 +76,7 @@ export default function Chat({ session }) {
         // --- SAFEGUARD LOGIC ---
         const eventType = payload.eventType;
         const newRecord = payload.new;
-        const oldRecord = payload.old;
-
+        
         // 1. Handle INSERT (New Message)
         if (eventType === 'INSERT' && newRecord) {
           if (
@@ -90,7 +101,6 @@ export default function Chat({ session }) {
 
         // 3. Handle DELETE (Hard Delete / Unsend)
         if (eventType === 'DELETE') {
-          // For deletes, we often just want to refresh to be safe
           fetchMessages();
         }
       })
@@ -99,9 +109,20 @@ export default function Chat({ session }) {
     return () => { supabase.removeChannel(channel); };
   }, [receiverId]);
 
-  // 2. Auto-scroll on new message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // 2. NEW: Centralized Scroll Function
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      const { scrollHeight, clientHeight } = chatContainerRef.current;
+      chatContainerRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  };
+
+  // 3. CHANGED: Use 'useLayoutEffect' and triggers
+  useLayoutEffect(() => {
+    scrollToBottom();
+    // Small timeout to catch any layout shifts (standard React Chat trick)
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   async function fetchMessages() {
@@ -112,7 +133,6 @@ export default function Chat({ session }) {
       .order('created_at', { ascending: true });
 
     // CLIENT-SIDE FILTERING (The "Soft Delete" Magic)
-    // Only show messages that haven't been "deleted" by the current user
     const visibleMessages = (data || []).filter(msg => {
       if (msg.sender_id === myId && msg.deleted_by_sender) return false;
       if (msg.receiver_id === myId && msg.deleted_by_receiver) return false;
@@ -128,7 +148,6 @@ export default function Chat({ session }) {
 
   // --- ACTIONS ---
 
-  // 1. Send Message
   async function handleSendMessage(e) {
     e?.preventDefault();
     if (!newMessage.trim()) return;
@@ -142,7 +161,6 @@ export default function Chat({ session }) {
     if (!error) setNewMessage('');
   }
 
-  // 2. Upload File
   async function handleFileUpload(e) {
     if (!e.target.files?.length) return;
     const file = e.target.files[0];
@@ -160,39 +178,28 @@ export default function Chat({ session }) {
     setUploading(false);
   }
 
-  // 3. Delete Single Message ("Unsend")
-  // Only allowed for your own sent messages
   async function handleDeleteSingleMessage(msgId, mediaUrl) {
     if (!confirm("Unsend this message? It will be removed for everyone.")) return;
     
-    // Delete from DB (Hard Delete)
     await supabase.from('messages').delete().eq('id', msgId);
-    
-    // Optional: Delete media file to save space
     if (mediaUrl) await supabase.storage.from('chat-uploads').remove([mediaUrl]);
-    
-    // Update local state instantly for snappiness
     setMessages(prev => prev.filter(m => m.id !== msgId));
   }
 
-  // 4. Clear History ("Delete Chat")
-  // Soft delete: just hides them for you
   async function handleClearHistory() {
     if (!confirm("Clear chat history? This will hide messages for you.")) return;
     
-    // Hide sent messages
     await supabase.from('messages')
       .update({ deleted_by_sender: true })
       .eq('sender_id', myId)
       .eq('receiver_id', receiverId);
 
-    // Hide received messages
     await supabase.from('messages')
       .update({ deleted_by_receiver: true })
       .eq('receiver_id', myId)
       .eq('sender_id', receiverId);
 
-    setMessages([]); // Clear screen instantly
+    setMessages([]); 
     setShowMenu(false);
   }
 
@@ -234,16 +241,17 @@ export default function Chat({ session }) {
       </div>
 
       {/* MESSAGES LIST */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3">
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 scroll-smooth"
+      >
         {messages.map((msg) => {
           const isMe = msg.sender_id === myId;
           return (
             <div key={msg.id} className={`flex group ${isMe ? 'justify-end' : 'justify-start'}`}>
               
-              {/* Message Bubble Container */}
               <div className={`flex items-end gap-2 max-w-[85%] md:max-w-[70%]`}>
                 
-                {/* Delete Button (Only for Sender) */}
                 {isMe && (
                   <button 
                     onClick={() => handleDeleteSingleMessage(msg.id, msg.media_url)}
@@ -255,7 +263,9 @@ export default function Chat({ session }) {
                 )}
 
                 <div className={`rounded-2xl p-3 shadow-sm flex flex-col min-w-[80px] ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'}`}>
-                  {msg.media_url && <MediaMessage path={msg.media_url} />}
+                  {/* 4. PASS THE SCROLL FUNCTION TO MEDIA COMPONENT */}
+                  {msg.media_url && <MediaMessage path={msg.media_url} onLoaded={scrollToBottom} />}
+                  
                   {msg.content && <p className="leading-relaxed text-sm md:text-base whitespace-pre-wrap break-words">{msg.content}</p>}
                   
                   <div className="text-[10px] flex items-center justify-end gap-1 mt-1 opacity-70">
@@ -268,7 +278,6 @@ export default function Chat({ session }) {
             </div>
           );
         })}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* INPUT AREA */}

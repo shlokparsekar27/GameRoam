@@ -29,7 +29,7 @@ export default function Navbar({ session, profile }) {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo - UPDATED: Now links to /marketplace */}
-          <Link to="/marketplace" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
+          <Link to="/about" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition">
             <Gamepad2 className="w-8 h-8 text-indigo-500" />
             <span>
               Game<span className="text-indigo-500">Roam</span>

@@ -7,11 +7,12 @@ import { Loader2 } from 'lucide-react';
 import Auth from './components/Auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
-import Dashboard from './pages/MyVault';
-import Profile from './pages/Profiles';
-import Marketplace from './pages/Market';
+import MyVault from './pages/MyVault';
+import Profiles from './pages/Profiles';
+import Market from './pages/Market';
 import UserProfile from './pages/UserProfile';
 import ChatPage from './pages/ChatPage';
 import Community from './pages/Community';
@@ -69,6 +70,7 @@ export default function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       {/* 1. FLEX WRAPPER: min-h-screen + flex-col ensures full height */}
       <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col">
         
@@ -77,9 +79,9 @@ export default function App() {
         {/* 2. MAIN CONTENT: flex-1 forces this div to grow and push Footer down */}
         <div className="max-w-7xl mx-auto p-6 md:p-12 w-full flex-1">
           <Routes>
-            <Route path="/" element={<Dashboard session={session} />} />
-            <Route path="/profile" element={<Profile session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
-            <Route path="/marketplace" element={<Marketplace session={session} />} />
+            <Route path="/" element={<MyVault session={session} />} />
+            <Route path="/profile" element={<Profiles session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
+            <Route path="/marketplace" element={<Market session={session} />} />
             <Route path="/user/:userId" element={<UserProfile session={session} />} />
             <Route path="*" element={<Navigate to="/" />} />
             <Route path="/chat" element={<ChatPage session={session} />} />
