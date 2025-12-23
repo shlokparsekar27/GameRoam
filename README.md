@@ -1,11 +1,8 @@
 # GameRoam 🎮
 
-[![Vercel App](https://deploy-badge.vercel.app/vercel/gameroam)](https://gameroam.vercel.app)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 A modern web application designed to help gamers track, manage, rent, and sell their physical game collections. GameRoam provides a centralized "Vault" for your library and a Marketplace to connect with other local gamers for trades and rentals.
 
-### 🚀 [**View Live Demo**](https://gameroam.vercel.app)
+### 🚀 [View Live Demo](https://gameroam.vercel.app)
 
 ---
 
@@ -93,10 +90,13 @@ The application should now be running on `http://localhost:5173/`.
 
 This project is configured for seamless deployment on **Vercel**.
 
-1.  Push your code to a GitHub repository.
-2.  Import the project into Vercel.
-3.  Add the Environment Variables (`VITE_SUPABASE_URL`, etc.) in the Vercel Project Settings.
-4.  Deploy!
+1.  **Push to GitHub:** Ensure your project is pushed to a public or private GitHub repository.
+2.  **Import to Vercel:** Log in to Vercel and import your project repository.
+3.  **Environment Variables:** In the Vercel dashboard, go to **Settings > Environment Variables** and add the following:
+    * `VITE_SUPABASE_URL`
+    * `VITE_SUPABASE_ANON_KEY`
+    * `VITE_RAWG_API_KEY`
+4.  **Deploy:** Click **Deploy**. Vercel will automatically detect the Vite settings and build your application.
 
 ---
 
