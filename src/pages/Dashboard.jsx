@@ -200,7 +200,7 @@ export default function Dashboard({ session }) {
               onClick={() => setIsAddModalOpen(true)}
               className="text-indigo-400 font-bold hover:text-indigo-300 transition"
             >
-              + Add First Game
+              + Add Game
             </button>
           </div>
         ) : (
