@@ -16,11 +16,35 @@ export default function Marketplace({ session }) {
   const [typeFilter, setTypeFilter] = useState('All');
   const [platformFilter, setPlatformFilter] = useState('All');
   const [sortBy, setSortBy] = useState('Newest');
-  const [showFilters, setShowFilters] = useState(false); // Mobile toggle
+  const [showFiltersMobile, setShowFiltersMobile] = useState(false); // Mobile dropdown toggle
+
+  // Scroll Visibility State
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     fetchMarketplace();
   }, []);
+
+  // SCROLL LISTENER: Smart Hide/Show Logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show if scrolling UP or if near the TOP (first 50px)
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setIsHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Hide if scrolling DOWN and not at the top
+        setIsHeaderVisible(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   async function fetchMarketplace() {
     try {
@@ -62,13 +86,13 @@ export default function Marketplace({ session }) {
     <div className="min-h-screen pb-20 animate-in fade-in duration-700">
       
       {/* 1. HERO SECTION */}
-      <div className="relative mb-4 py-2 px-6 md:px-12 rounded-3xl overflow-hidden">
+      <div className="relative mb-12 py-12 px-6 md:px-12 rounded-3xl overflow-hidden">
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/40 via-purple-900/20 to-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl" />
         
         <div className="relative z-10 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h1 className="text-5xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 mb-2 drop-shadow-lg">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 mb-2 drop-shadow-lg">
               Marketplace
             </h1>
             <p className="text-indigo-300/80 text-lg max-w-lg">
@@ -89,8 +113,12 @@ export default function Marketplace({ session }) {
         </div>
       </div>
 
-      {/* 2. SEARCH & FILTER BAR */}
-      <div className="sticky top-24 z-30 mb-8 mx-auto max-w-7xl">
+      {/* 2. SEARCH & FILTER BAR (Sticky & Smart Hide) */}
+      <div 
+        className={`sticky top-20 z-30 mb-8 mx-auto max-w-7xl transition-all duration-500 ease-in-out ${
+          isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
+        }`}
+      >
         <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/50">
           
           {/* Top Row: Search & Toggles */}
@@ -109,14 +137,14 @@ export default function Marketplace({ session }) {
 
             {/* Mobile Filter Toggle */}
             <button 
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setShowFiltersMobile(!showFiltersMobile)}
               className="md:hidden flex items-center justify-center gap-2 bg-slate-800 text-white p-3 rounded-xl border border-slate-700"
             >
               <SlidersHorizontal size={18} /> Filters
             </button>
 
             {/* Desktop Filters (Always Visible) & Mobile Filters (Conditional) */}
-            <div className={`flex-col md:flex-row gap-4 ${showFilters ? 'flex' : 'hidden md:flex'} animate-in slide-in-from-top-2 md:animate-none`}>
+            <div className={`flex-col md:flex-row gap-4 ${showFiltersMobile ? 'flex' : 'hidden md:flex'} animate-in slide-in-from-top-2 md:animate-none`}>
               
               <div className="relative group min-w-[140px]">
                  <MapPin className="absolute left-3 top-3.5 text-slate-500 group-focus-within:text-indigo-400" size={16} />
@@ -253,7 +281,7 @@ export default function Marketplace({ session }) {
                     </div>
                     <div className="min-w-0">
                       <p className="text-slate-300 text-xs font-bold truncate group-hover/owner:text-white transition">
-                        {game.owner?.username || "Unknown"}
+                        @{game.owner?.username || "Unknown"}
                       </p>
                       <p className="text-slate-500 text-[10px] flex items-center gap-1 truncate">
                         <MapPin size={10} /> {game.owner?.location || "Earth"}
@@ -342,7 +370,7 @@ export default function Marketplace({ session }) {
                     )}
                   </div>
                   <div>
-                    <p className="text-white font-bold text-lg group-hover:text-indigo-400 transition">{selectedGame.owner?.username}</p>
+                    <p className="text-white font-bold text-lg group-hover:text-indigo-400 transition">@{selectedGame.owner?.username}</p>
                     <p className="text-slate-500 text-xs flex items-center gap-1"><MapPin size={12}/> {selectedGame.owner?.location || "Nearby"}</p>
                   </div>
                 </div>

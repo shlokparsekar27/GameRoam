@@ -4,7 +4,7 @@ import {
   Plus, Gamepad2, Pencil, Trash2, Clock, CheckCircle, 
   Archive, DollarSign, Activity, LayoutGrid, X, MapPin, ArrowDownCircle 
 } from 'lucide-react';
-import { createPortal } from 'react-dom'; // Ensure this is imported for the modals
+import { createPortal } from 'react-dom'; 
 import AddGameModal from '../components/AddGameModal';
 import EditGameModal from '../components/EditGameModal';
 
@@ -22,10 +22,34 @@ export default function Dashboard({ session }) {
   
   const [filter, setFilter] = useState('All'); 
 
+  // Scroll Visibility State
+  const [isFiltersVisible, setIsFiltersVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   useEffect(() => {
     fetchGames();
     fetchProfile();
   }, [session]);
+
+  // SCROLL LISTENER: Smart Hide Logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show if scrolling UP or if near the TOP (first 100px)
+      if (currentScrollY < lastScrollY || currentScrollY < 100) {
+        setIsFiltersVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Hide if scrolling DOWN and not at the top
+        setIsFiltersVisible(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   async function fetchProfile() {
     try {
@@ -81,7 +105,7 @@ export default function Dashboard({ session }) {
   return (
     <>
       {/* MAIN CONTENT WRAPPER */}
-      <div className="max-w-5xl mx-auto px-4 pb-40 animate-in fade-in duration-700">
+      <div className="max-w-5xl mx-auto px-4 pt-10 pb-40 animate-in fade-in duration-700">
         
         {/* 1. HERO / STATS HEADER */}
         <div className="relative mb-10 py-8 px-6 md:px-10 rounded-[2rem] overflow-hidden bg-slate-900 border border-white/5 shadow-2xl">
@@ -133,10 +157,15 @@ export default function Dashboard({ session }) {
           </div>
         </div>
 
-        {/* 2. FILTERS (Evenly Spaced Grid - 7 Items) */}
-        <div className="sticky top-20 z-30 mb-8 bg-slate-950/80 backdrop-blur-lg p-2 rounded-2xl border border-white/5 shadow-2xl">
+        {/* 2. FILTERS (Sticky & Smart Hide) */}
+        <div 
+          className={`sticky top-20 z-30 mb-8 bg-slate-950/80 backdrop-blur-lg p-2 rounded-2xl border border-white/5 shadow-2xl transition-all duration-500 ease-in-out ${
+            isFiltersVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'
+          }`}
+        >
+          {/* UPDATED GRID: 7 Columns for Even Spacing */}
           <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
-            {['All', 'Library', 'Rent', 'Sale', 'Rented In', 'Rented Out', 'Sold'].map((f) => (
+            {['All', 'Library', 'Rent', 'Rented In', 'Sale', 'Rented Out', 'Sold'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -171,7 +200,7 @@ export default function Dashboard({ session }) {
               onClick={() => setIsAddModalOpen(true)}
               className="text-indigo-400 font-bold hover:text-indigo-300 transition"
             >
-              + Add Game
+              + Add First Game
             </button>
           </div>
         ) : (
@@ -202,7 +231,7 @@ export default function Dashboard({ session }) {
                         game.listing_type === 'Sale' ? 'bg-emerald-500/90 text-white border-emerald-400/30' :
                         game.listing_type === 'Rent' ? 'bg-indigo-500/90 text-white border-indigo-400/30' :
                         game.listing_type === 'Rented Out' ? 'bg-amber-500/90 text-white border-amber-400/30' :
-                        game.listing_type === 'Rented In' ? 'bg-purple-500/90 text-white border-purple-400/30' : // Added Rented In style
+                        game.listing_type === 'Rented In' ? 'bg-purple-500/90 text-white border-purple-400/30' : 
                         game.listing_type === 'Sold' ? 'bg-slate-700/90 text-slate-300 border-slate-600/30' :
                         'bg-slate-800/90 text-slate-300 border-slate-600/30'
                       }`}>
