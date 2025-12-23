@@ -53,7 +53,7 @@ To get a local copy of this project up and running on your machine, follow these
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/shlokparsekar27/gameroam.git
+    git clone [https://github.com/shlokparsekar27/gameroam.git](https://github.com/shlokparsekar27/gameroam.git)
     ```
 
 2.  **Navigate to the project directory:**
