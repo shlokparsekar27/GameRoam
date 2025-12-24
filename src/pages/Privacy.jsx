@@ -1,6 +1,14 @@
-import { Shield, Lock, Eye, FileText, ScanEye, Server, Fingerprint } from 'lucide-react';
+import { Shield, Lock, Eye, FileText, ScanEye, Server, Fingerprint, Copy } from 'lucide-react';
+import { useToast } from '../components/TacticalToast'; // <--- IMPORT
 
 export default function Privacy() {
+  const toast = useToast(); // <--- HOOK
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText("privacy@gameroam.com");
+    toast.info("CONTACT DATA CAPTURED TO CLIPBOARD.");
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-12 pt-28 px-4 text-slate-300 animate-in fade-in duration-500 pb-20">
 
@@ -53,8 +61,8 @@ export default function Privacy() {
               <Lock className="text-emerald-500" size={24} /> 3. Encryption Standards
             </h2>
             <p className="text-sm font-ui leading-relaxed">
-              We deploy military-grade encryption for all authentication protocols. 
-              However, no data transmission across the open web is 100% impenetrable. 
+              We deploy military-grade encryption for all authentication protocols.
+              However, no data transmission across the open web is 100% impenetrable.
               Operators transmit data at their own risk.
             </p>
           </div>
@@ -79,9 +87,15 @@ export default function Privacy() {
         {/* Contact */}
         <div className="bg-cyber/10 p-8 clip-chamfer border border-cyber/30 mt-12 text-center">
           <h3 className="text-xl font-mech font-bold text-white mb-2 uppercase">Inquiries</h3>
-          <p className="text-slate-400 font-code text-xs">
-            Direct security concerns to <a href="mailto:privacy@gameroam.com" className="text-cyber hover:underline">PRIVACY@GAMEROAM.COM</a>.
+          <p className="text-slate-400 font-code text-xs mb-3">
+            Direct security concerns to central command:
           </p>
+          <button
+            onClick={copyEmail}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-cyber text-black font-mech font-bold text-xs uppercase tracking-widest clip-chamfer hover:bg-white transition shadow-neon-cyan"
+          >
+            <Copy size={16} /> COPY_EMAIL_CIPHER
+          </button>
         </div>
 
       </div>

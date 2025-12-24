@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;700&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,37 +9,58 @@
 }
 
 body {
-  @apply bg-void-900 text-slate-300 font-ui overflow-x-hidden;
-  /* The Grid Floor */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), 
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  @apply bg-void-950 text-slate-300 font-ui overflow-x-hidden selection:bg-cyber selection:text-black;
+  /* The Grid Floor - infinite holographic plane */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.05) 0%, transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), 
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  background-position: center top;
+  background-attachment: fixed;
 }
 
 /* Custom Scrollbar - The "Cooling Vent" look */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-void-900;
+  @apply bg-void-950;
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-void-700 rounded-full border border-void-900;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-cyber;
+  @apply bg-cyber shadow-[0_0_10px_rgba(0,240,255,0.5)];
 }
 
-/* Utility for Chamfered Edges (The Sci-Fi Cut) */
-.clip-chamfer {
-  clip-path: polygon(
-    10px 0, 100% 0, 
-    100% calc(100% - 10px), calc(100% - 10px) 100%, 
-    0 100%, 0 10px
-  );
-}
+@layer utilities {
+  /* Dynamic Glass Panel */
+  .glass-panel {
+    @apply bg-void-900/60 backdrop-blur-xl border border-white/5 shadow-glass-insect;
+  }
+  
+  /* Hover Physics */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-white/10;
+  }
 
-/* Text Glow Utility */
-.text-glow {
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  /* Text Effects */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  }
+  
+  .text-glow-flux {
+    text-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
+  }
+
+  /* Sci-Fi Cuts */
+  .clip-chamfer {
+    clip-path: polygon(
+      10px 0, 100% 0, 
+      100% calc(100% - 10px), calc(100% - 10px) 100%, 
+      0 100%, 0 10px
+    );
+  }
 }

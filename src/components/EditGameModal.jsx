@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Clock, Sliders, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useToast } from './TacticalToast'; // <--- IMPORT
 
 export default function EditGameModal({ game, onClose, onGameUpdated }) {
+  const toast = useToast(); // <--- HOOK
   const [formData, setFormData] = useState({
     title: game.title,
     platform: game.platform || 'PC',
@@ -19,24 +21,25 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
   const [fetchingImage, setFetchingImage] = useState(false);
 
   async function fetchGameCover() {
-    if (!formData.title) return alert("INPUT_REQUIRED: Enter asset title.");
-    
+    if (!formData.title) return toast.warning("INPUT_REQUIRED: Enter asset title.");
+
     setFetchingImage(true);
     try {
       const apiKey = import.meta.env.VITE_RAWG_API_KEY;
-      if (!apiKey) return alert("SysErr: MISSING_API_KEY");
+      if (!apiKey) return toast.error("SysErr: MISSING_API_KEY");
 
       const response = await fetch(`https://api.rawg.io/api/games?key=${apiKey}&search=${formData.title}&page_size=1`);
       const data = await response.json();
 
       if (data.results && data.results.length > 0) {
         setFormData(prev => ({ ...prev, cover_url: data.results[0].background_image }));
+        toast.info("SCAN_COMPLETE: VISUAL UPDATED.");
       } else {
-        alert("SCAN_RESULT: Negative. Check spelling.");
+        toast.warning("SCAN_RESULT: Negative. Check spelling.");
       }
     } catch (error) {
       console.error(error);
-      alert("NET_ERR: Connection failed.");
+      toast.error("NET_ERR: Connection failed.");
     } finally {
       setFetchingImage(false);
     }
@@ -63,8 +66,9 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
 
       onGameUpdated();
       onClose();
+      toast.success("CONFIGURATION SAVED.");
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message.toUpperCase());
     } finally {
       setLoading(false);
     }
@@ -74,7 +78,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
     <div className="fixed inset-0 bg-void-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
       <div className="bg-void-800 w-full max-w-md p-1 clip-chamfer shadow-2xl shadow-cyber/20 relative">
         <div className="bg-void-800 border border-white/10 p-6 h-full clip-chamfer max-h-[90vh] overflow-y-auto custom-scrollbar">
-          
+
           <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-flux transition z-10 hover:rotate-90 duration-300">
             <X size={24} />
           </button>
@@ -87,7 +91,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
+
             <div className="group">
               <label className="block text-cyber/80 text-[10px] font-mech font-bold uppercase tracking-widest mb-1">Asset Designation</label>
               <input
@@ -116,7 +120,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                   {fetchingImage ? <Loader2 className="animate-spin" size={16} /> : <Wand2 size={16} />}
                 </button>
               </div>
-              
+
               {formData.cover_url && (
                 <div className="h-32 w-full overflow-hidden border border-void-700 relative group bg-void-950">
                   <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
@@ -140,7 +144,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                     <option value="Xbox">XBOX_SERIES</option>
                     <option value="Switch">NINTENDO_SW</option>
                   </select>
-                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
                 </div>
               </div>
               <div>
@@ -158,7 +162,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                     <option value="Rented In">STATUS_BORROWED</option>
                     <option value="Sold">STATUS_SOLD</option>
                   </select>
-                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
                 </div>
               </div>
             </div>
@@ -178,8 +182,8 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                   <div className="w-1/2">
                     <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Acquisition Cost</label>
                     <div className="relative">
-                       <DollarSign className="absolute left-2 top-2.5 text-slate-600" size={12} />
-                       <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-void-700 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                      <DollarSign className="absolute left-2 top-2.5 text-slate-600" size={12} />
+                      <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-void-700 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
                     </div>
                   </div>
                   <div className="w-1/2">
@@ -193,8 +197,8 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                 <div>
                   <label className="block text-plasma text-[10px] font-bold uppercase mb-1">Return Deadline</label>
                   <div className="relative">
-                     <Clock className="absolute left-2 top-2.5 text-plasma" size={14} />
-                     <input type="date" className="w-full bg-void-950 text-white pl-8 p-2 border border-plasma/50 text-sm font-code" value={formData.return_date} onChange={e => setFormData({ ...formData, return_date: e.target.value })} />
+                    <Clock className="absolute left-2 top-2.5 text-plasma" size={14} />
+                    <input type="date" className="w-full bg-void-950 text-white pl-8 p-2 border border-plasma/50 text-sm font-code" value={formData.return_date} onChange={e => setFormData({ ...formData, return_date: e.target.value })} />
                   </div>
                 </div>
               )}
@@ -204,8 +208,8 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                   <div className="w-1/2">
                     <label className="block text-emerald-500 text-[10px] font-bold uppercase mb-1">Credits Received</label>
                     <div className="relative">
-                       <DollarSign className="absolute left-2 top-2.5 text-emerald-600" size={12} />
-                       <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-emerald-500/30 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                      <DollarSign className="absolute left-2 top-2.5 text-emerald-600" size={12} />
+                      <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-emerald-500/30 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
                     </div>
                   </div>
                   <div className="w-1/2">
@@ -222,7 +226,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
               disabled={loading}
               className="group w-full relative overflow-hidden bg-cyber/10 border border-cyber text-cyber font-mech font-bold tracking-widest py-4 mt-4 transition-all hover:bg-cyber hover:text-black hover:shadow-neon-cyan disabled:opacity-50 clip-chamfer"
             >
-               <span className="relative z-10 flex items-center justify-center gap-2">
+              <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                 {loading ? 'OVERWRITING...' : 'SAVE CONFIGURATION'}
               </span>

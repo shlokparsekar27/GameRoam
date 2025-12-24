@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, User, Loader2, Gamepad2, AlertTriangle, Fingerprint } from 'lucide-react';
+import { useToast } from './TacticalToast'; // <--- IMPORT
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -8,29 +9,33 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
+  const toast = useToast(); // <--- HOOK
 
   async function handleOAuth(provider) {
-    setMessage(null);
     const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } });
-    if (error) setMessage({ type: 'error', text: error.message });
+    if (error) toast.error(error.message.toUpperCase());
   }
 
   async function handleAuth(e) {
     e.preventDefault();
     setLoading(true);
-    setMessage(null);
     try {
       if (isSignUp) {
         if (password !== confirmPassword) throw new Error("PASSWORD_MISMATCH_ERROR");
         const { error, data } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setMessage({ type: 'success', text: data.user && !data.session ? 'VERIFICATION_REQUIRED: Check Email.' : 'ID_CREATED.' });
+        // Check if session exists (auto-login) or if verification is needed
+        if (data.user && !data.session) {
+          toast.info("VERIFICATION_REQUIRED: CHECK EMAIL.");
+        } else {
+          toast.success("ID_CREATED. INITIALIZING SESSION...");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        toast.success("ACCESS GRANTED.");
       }
-    } catch (error) { setMessage({ type: 'error', text: error.message.toUpperCase() }); } 
+    } catch (error) { toast.error(error.message.toUpperCase()); }
     finally { setLoading(false); }
   }
 
@@ -41,11 +46,11 @@ export default function Auth() {
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber to-transparent opacity-50" />
 
       <div className="w-full max-w-md relative z-10">
-        
+
         {/* LOGO */}
         <div className="text-center mb-8">
           <div className="inline-block p-4 border border-cyber/30 bg-cyber/10 clip-chamfer mb-4">
-             <Gamepad2 size={48} className="text-cyber animate-pulse" />
+            <Gamepad2 size={48} className="text-cyber animate-pulse" />
           </div>
           <h1 className="text-5xl font-mech font-bold text-white mb-1 tracking-tight uppercase">
             Game<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber to-purple-500">Roam</span>
@@ -55,11 +60,11 @@ export default function Auth() {
 
         <div className="bg-void-900/80 backdrop-blur-xl p-1 clip-chamfer border border-white/10 shadow-2xl">
           <div className="p-8 clip-chamfer bg-void-900 border border-void-800">
-            
+
             {/* OAuth */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {['google', 'github'].map(p => (
-                <button 
+                <button
                   key={p}
                   onClick={() => handleOAuth(p)}
                   className="flex items-center justify-center gap-2 bg-void-950 border border-white/10 hover:border-cyber/50 hover:bg-void-800 text-white py-3 transition-all font-code font-bold text-xs uppercase tracking-wider clip-chamfer"
@@ -103,26 +108,18 @@ export default function Auth() {
                 </div>
               )}
 
-              {message && (
-                <div className={`p-3 text-[10px] font-code font-bold uppercase tracking-wide flex items-center gap-2 ${
-                  message.type === 'error' ? 'text-flux bg-flux/10 border border-flux/20' : 'text-cyber bg-cyber/10 border border-cyber/20'
-                }`}>
-                  <AlertTriangle size={14}/> {message.text}
-                </div>
-              )}
-
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-cyber hover:bg-white text-black font-mech font-bold py-4 transition-all duration-200 shadow-neon-cyan flex items-center justify-center gap-2 mt-4 clip-chamfer uppercase tracking-widest text-sm"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : (isSignUp ? <><Fingerprint size={18}/> INITIALIZE_ID</> : <><Fingerprint size={18}/> AUTHENTICATE</>)}
+                {loading ? <Loader2 className="animate-spin" size={18} /> : (isSignUp ? <><Fingerprint size={18} /> INITIALIZE_ID</> : <><Fingerprint size={18} /> AUTHENTICATE</>)}
               </button>
             </form>
-            
+
             <div className="mt-6 text-center">
               <button
-                onClick={() => { setIsSignUp(!isSignUp); setMessage(null); }}
+                onClick={() => { setIsSignUp(!isSignUp); }}
                 className="text-slate-500 hover:text-cyber text-xs font-code font-bold uppercase tracking-widest transition-colors"
               >
                 {isSignUp ? "Already Registered? Log In" : "New User? Register ID"}

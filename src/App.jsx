@@ -7,8 +7,9 @@ import { Loader2 } from 'lucide-react';
 import Auth from './components/Auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop'; 
-import CommandPalette from './components/CommandPalette'; // <--- NEW IMPORT
+import ScrollToTop from './components/ScrollToTop';
+import CommandPalette from './components/CommandPalette';
+import { ToastProvider } from './components/TacticalToast'; // <--- IMPORT
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -43,7 +44,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Track if session was restored (vs fresh login)
   const [isReturningUser, setIsReturningUser] = useState(false);
 
@@ -87,57 +88,71 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-void-950 flex items-center justify-center text-white">
-        <Loader2 className="animate-spin text-cyber" size={48} />
-      </div>
+      <ToastProvider>
+        <div className="min-h-screen bg-void-950 flex items-center justify-center text-white">
+          <Loader2 className="animate-spin text-cyber" size={48} />
+        </div>
+      </ToastProvider>
     );
   }
 
-  if (!session) return <Auth />;
+  if (!session) {
+    return (
+      <ToastProvider>
+        <Auth />
+      </ToastProvider>
+    );
+  }
 
   return (
     <Router>
-      <ScrollToTop />
-      <RedirectHandler isReturningUser={isReturningUser} />
-      
-      {/* GLOBAL COMMAND PALETTE */}
-      <CommandPalette />
-      
-      {/* CORE LAYOUT WRAPPER 
-         - Applied 'font-ui' and 'bg-void-900' globally.
-         - 'selection:bg-cyber' makes text highlighting look tactical.
-      */}
-      <div className="min-h-screen bg-void-900 text-slate-300 font-ui flex flex-col relative selection:bg-cyber selection:text-black">
-        
-        <Navbar session={session} profile={userProfile} />
-        
-        {/* MAIN VIEWPORT 
-            - Removed 'max-w-7xl' and padding here because pages now control their own layout containers.
-            - Added 'relative z-10' to ensure content sits above any background effects.
-        */}
-        <main className="flex-1 w-full relative z-10">
-          <Routes>
-            <Route path="/" element={<About />} />
-            <Route path="/vault" element={<Dashboard session={session} />} />
-            <Route path="/profile" element={<Profile session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
-            <Route path="/marketplace" element={<Marketplace session={session} />} />
-            <Route path="/user/:userId" element={<UserProfile session={session} />} />
-            
-            <Route path="*" element={<Navigate to="/" />} />
-            
-            <Route path="/chat" element={<ChatPage session={session} />} />
-            <Route path="/chat/:receiverId" element={<ChatPage session={session} />} />
-            <Route path="/community" element={<Community session={session} />} />
-            <Route path="/community/feed" element={<CommunityFeed session={session} />} />
-            <Route path="/community/post/:postId" element={<PostDetails session={session} />} />
-            
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-          </Routes>
-        </main>
+      <ToastProvider>
+        <ScrollToTop />
+        <RedirectHandler isReturningUser={isReturningUser} />
 
-        <Footer />
-      </div>
+        {/* GLOBAL COMMAND PALETTE */}
+        <CommandPalette />
+
+        {/* CORE LAYOUT WRAPPER 
+           - Applied 'font-ui' and 'bg-void-900' globally.
+           - 'selection:bg-cyber' makes text highlighting look tactical.
+        */}
+        <div className="min-h-screen bg-void-900 text-slate-300 font-ui flex flex-col relative selection:bg-cyber selection:text-black">
+
+          <Navbar session={session} profile={userProfile} />
+
+          {/* MAIN VIEWPORT 
+              - Added 'pt-24' for Desktop HUD clearance.
+              - Added 'pb-24' for Mobile Bottom Bar clearance.
+              - 'md:pb-12' resets bottom padding on desktop where footer exists.
+          */}
+          <main className="flex-1 w-full relative z-10 pt-20 md:pt-28 pb-24 md:pb-12 px-4 md:px-8 max-w-7xl mx-auto">
+            <Routes>
+              {/* Redirect root to /about, so users are safe from the RedirectHandler's specific check on '/' */}
+              <Route path="/" element={<Navigate to="/about" replace />} />
+              <Route path="/about" element={<About />} />
+
+              <Route path="/vault" element={<Dashboard session={session} />} />
+              <Route path="/profile" element={<Profile session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
+              <Route path="/marketplace" element={<Marketplace session={session} />} />
+              <Route path="/user/:userId" element={<UserProfile session={session} />} />
+
+              <Route path="*" element={<Navigate to="/about" />} />
+
+              <Route path="/chat" element={<ChatPage session={session} />} />
+              <Route path="/chat/:receiverId" element={<ChatPage session={session} />} />
+              <Route path="/community" element={<Community session={session} />} />
+              <Route path="/community/feed" element={<CommunityFeed session={session} />} />
+              <Route path="/community/post/:postId" element={<PostDetails session={session} />} />
+
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+            </Routes>
+          </main>
+
+          <Footer />
+        </div>
+      </ToastProvider>
     </Router>
   );
 }

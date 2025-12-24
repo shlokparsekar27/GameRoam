@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Gamepad2, Heart, Code2, Cpu, Shield, Zap } from 'lucide-react';
+import { Gamepad2, Code2, Cpu, Shield, Zap, Activity, Signal, Wifi, Power } from 'lucide-react';
 import { FaDiscord, FaTwitch, FaSteam, FaYoutube, FaGithub, FaLinkedin } from 'react-icons/fa';
-import { Activity } from 'react';
 
 export default function Footer() {
     return (
         <footer className="bg-void-950 border-t border-white/5 pt-16 pb-8 text-slate-400 text-sm mt-auto relative overflow-hidden">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
-            
+
             <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
 
                 {/* MAIN GRID */}
@@ -16,7 +15,7 @@ export default function Footer() {
 
                     {/* COLUMN 1: BRAND & MISSION */}
                     <div className="space-y-4">
-                        <Link to="/about" className="flex items-center gap-3 text-white group">
+                        <Link to="/about" className="flex items-center gap-3 text-white group w-fit">
                             <div className="p-2 bg-void-800 border border-white/10 clip-chamfer group-hover:border-cyber/50 transition">
                                 <Gamepad2 className="text-cyber" size={24} />
                             </div>
@@ -33,10 +32,10 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* COLUMN 2: DISCOVER (Internal Links) */}
+                    {/* COLUMN 2: NAVIGATION */}
                     <div>
                         <h3 className="text-white font-mech font-bold mb-6 text-lg uppercase tracking-wider flex items-center gap-2">
-                            <Zap size={16} className="text-purple-500"/> Navigation
+                            <Zap size={16} className="text-purple-500" /> Navigation
                         </h3>
                         <ul className="space-y-3 font-code text-xs">
                             <li><Link to="/about" className="hover:text-cyber transition flex items-center gap-2"><span className="text-void-700">&gt;</span> SYSTEM_INTEL</Link></li>
@@ -46,10 +45,10 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* COLUMN 3: CONNECT (Socials) */}
+                    {/* COLUMN 3: FREQUENCY (Socials) */}
                     <div>
-                        <h3 className="text-white font-mech font-bold mb-6 text-lg uppercase tracking-wider">
-                            <Activity size={16} className="text-purple-800"/> Frequency
+                        <h3 className="text-white font-mech font-bold mb-6 text-lg uppercase tracking-wider flex items-center gap-2">
+                            <Activity size={18} className="text-emerald-400" /> Frequency
                         </h3>
                         <ul className="space-y-3 font-code text-xs">
                             <li>
@@ -107,13 +106,29 @@ export default function Footer() {
 
                 </div>
 
-                {/* BOTTOM BAR */}
-                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                {/* BOTTOM BAR / SYSTEM DIAGNOSTICS */}
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+
+                    {/* Copyright */}
                     <p className="font-code text-xs text-slate-600">&copy; {new Date().getFullYear()} GAMEROAM_SYSTEMS. ALL RIGHTS RESERVED.</p>
 
-                    <div className="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-wider font-mech">
-                        <Link to="/privacy" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12}/> Security Protocols</Link>
-                        <Link to="/terms" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12}/> Operator Agreement</Link>
+                    {/* Diagnostic Modules */}
+                    <div className="flex flex-wrap justify-center gap-4 text-[10px] uppercase font-code tracking-widest text-slate-500">
+                        <div className="flex items-center gap-2 px-3 py-1 bg-void-900 border border-white/5 clip-chamfer">
+                            <Wifi size={10} className="text-emerald-500" /> LATENCY: 24ms
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-void-900 border border-white/5 clip-chamfer">
+                            <Power size={10} className="text-cyber" /> SYSTEMS: ONLINE
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-void-900 border border-white/5 clip-chamfer">
+                            <Signal size={10} className="text-flux" /> ENCRYPTION: 256-BIT
+                        </div>
+                    </div>
+
+                    {/* Legal Links */}
+                    <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider font-mech">
+                        <Link to="/privacy" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12} /> Security</Link>
+                        <Link to="/terms" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12} /> Protocol</Link>
                     </div>
                 </div>
 
