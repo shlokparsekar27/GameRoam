@@ -1,76 +1,86 @@
-import { Shield, Lock, Eye, FileText } from 'lucide-react';
+import { Shield, Lock, Eye, FileText, ScanEye, Server, Fingerprint } from 'lucide-react';
 
 export default function Privacy() {
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 text-slate-300 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto py-12 pt-28 px-4 text-slate-300 animate-in fade-in duration-500 pb-20">
 
       {/* Header */}
-      <div className="mb-12 border-b border-slate-800 pb-8">
-        <h1 className="text-4xl font-extrabold text-white mb-4">Privacy Policy</h1>
-        <p className="text-slate-400">Last updated: {new Date().toLocaleDateString()}</p>
-        <p className="mt-4 text-lg text-slate-300">
-          Your privacy is critically important to us. At GameRoam, we have a few fundamental principles:
-        </p>
+      <div className="mb-12 border-b border-white/5 pb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyber/10 border border-cyber/20 clip-chamfer mb-4">
+          <Shield className="text-cyber" size={14} />
+          <span className="text-[10px] font-code font-bold text-cyber uppercase tracking-widest">Confidentiality Level: High</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-mech font-bold text-white mb-4 uppercase">Security Protocols</h1>
+        <p className="text-slate-500 font-code text-xs uppercase tracking-wide">Last System Update: {new Date().toLocaleDateString()}</p>
       </div>
 
       <div className="space-y-12">
 
         {/* Section 1 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Eye className="text-indigo-500" size={24} /> 1. Information We Collect
-          </h2>
-          <p>We only collect information that is necessary to provide our service. This includes:</p>
-          <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-            <li><strong>Account Information:</strong> When you sign up, we collect your email address and create a user ID. You may optionally provide a username, profile picture, and location.</li>
-            <li><strong>Usage Data:</strong> We collect data on how you interact with the community, including posts, likes, and marketplace listings.</li>
-            <li><strong>Communication Data:</strong> Messages sent via our chat system are stored securely to enable communication between buyers and sellers.</li>
-          </ul>
-        </section>
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
+          <div className="bg-void-900 p-8 clip-chamfer">
+            <h2 className="text-xl font-mech font-bold text-white flex items-center gap-3 mb-4 uppercase tracking-wider">
+              <ScanEye className="text-cyber" size={24} /> 1. Data Interception Logs
+            </h2>
+            <p className="text-sm font-ui mb-4">We only capture data streams necessary for system functionality:</p>
+            <ul className="list-disc pl-6 space-y-2 marker:text-cyber text-sm font-code text-slate-400">
+              <li><strong className="text-white">ID_DATA:</strong> Email, User ID, Profile Visuals, Sector Location.</li>
+              <li><strong className="text-white">TELEMETRY:</strong> Interaction logs, Exchange listings, and Uplink activity.</li>
+              <li><strong className="text-white">COMMS:</strong> Encrypted message packets stored for trade verification.</li>
+            </ul>
+          </div>
+        </div>
 
         {/* Section 2 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <FileText className="text-indigo-500" size={24} /> 2. How We Use Your Information
-          </h2>
-          <p>We use the information we collect to:</p>
-          <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-            <li><strong>Facilitate Trades:</strong> Your location (City/Region) is used to show you relevant listings nearby. We never share your precise GPS coordinates.</li>
-            <li><strong>Build Community:</strong> Your profile data helps other gamers identify who they are interacting with, building trust in the ecosystem.</li>
-            <li><strong>Safety & Moderation:</strong> We monitor public posts and reports to prevent harassment, spam, and fraudulent activity.</li>
-          </ul>
-        </section>
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
+          <div className="bg-void-900 p-8 clip-chamfer">
+            <h2 className="text-xl font-mech font-bold text-white flex items-center gap-3 mb-4 uppercase tracking-wider">
+              <Server className="text-purple-500" size={24} /> 2. Data Utilization Protocols
+            </h2>
+            <p className="text-sm font-ui mb-4">Captured intelligence is utilized for:</p>
+            <ul className="list-disc pl-6 space-y-2 marker:text-purple-500 text-sm font-code text-slate-400">
+              <li><strong className="text-white">GRID_MATCHING:</strong> Utilizing location data to identify local assets. Precise coordinates are masked.</li>
+              <li><strong className="text-white">REPUTATION_SYSTEM:</strong> Public logs build operator trust ratings.</li>
+              <li><strong className="text-white">THREAT_MITIGATION:</strong> Monitoring for rogue signals (spam/fraud).</li>
+            </ul>
+          </div>
+        </div>
 
         {/* Section 3 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Lock className="text-indigo-500" size={24} /> 3. Data Security
-          </h2>
-          <p>
-            We implement industry-standard security measures to protect your data. All user authentication is handled via secure, encrypted protocols.
-            However, no method of transmission over the Internet is 100% secure. While we strive to protect your personal data, we cannot guarantee its absolute security.
-          </p>
-        </section>
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
+          <div className="bg-void-900 p-8 clip-chamfer">
+            <h2 className="text-xl font-mech font-bold text-white flex items-center gap-3 mb-4 uppercase tracking-wider">
+              <Lock className="text-emerald-500" size={24} /> 3. Encryption Standards
+            </h2>
+            <p className="text-sm font-ui leading-relaxed">
+              We deploy military-grade encryption for all authentication protocols. 
+              However, no data transmission across the open web is 100% impenetrable. 
+              Operators transmit data at their own risk.
+            </p>
+          </div>
+        </div>
 
         {/* Section 4 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Shield className="text-indigo-500" size={24} /> 4. Third-Party Sharing
-          </h2>
-          <p>
-            <strong>We do not sell your personal data.</strong> We only share data with third-party services that enable our app to function, such as:
-          </p>
-          <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-            <li><strong>Database Providers:</strong> To store your account and content data securely.</li>
-            <li><strong>Image Hosting Services:</strong> To store and serve your uploaded game covers and profile pictures.</li>
-          </ul>
-        </section>
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
+          <div className="bg-void-900 p-8 clip-chamfer">
+            <h2 className="text-xl font-mech font-bold text-white flex items-center gap-3 mb-4 uppercase tracking-wider">
+              <Fingerprint className="text-flux" size={24} /> 4. Third-Party Uplinks
+            </h2>
+            <p className="text-sm font-ui mb-4">
+              <strong className="text-white">WE DO NOT SELL OPERATOR DATA.</strong> External uplinks are limited to:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 marker:text-flux text-sm font-code text-slate-400">
+              <li><strong className="text-white">CORE_DATABASE:</strong> Secure cloud storage for system integrity.</li>
+              <li><strong className="text-white">VISUAL_HOSTING:</strong> Asset storage for game covers and ID cards.</li>
+            </ul>
+          </div>
+        </div>
 
         {/* Contact */}
-        <div className="bg-slate-900/50 p-8 rounded-2xl border border-slate-800 mt-12">
-          <h3 className="text-xl font-bold text-white mb-2">Questions?</h3>
-          <p className="text-slate-400">
-            If you have any questions about this Privacy Policy, please contact us at <a href="mailto:privacy@gameroam.com" className="text-indigo-400 hover:underline">privacy@gameroam.com</a>.
+        <div className="bg-cyber/10 p-8 clip-chamfer border border-cyber/30 mt-12 text-center">
+          <h3 className="text-xl font-mech font-bold text-white mb-2 uppercase">Inquiries</h3>
+          <p className="text-slate-400 font-code text-xs">
+            Direct security concerns to <a href="mailto:privacy@gameroam.com" className="text-cyber hover:underline">PRIVACY@GAMEROAM.COM</a>.
           </p>
         </div>
 

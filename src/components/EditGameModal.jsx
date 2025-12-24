@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Calendar, Clock } from 'lucide-react';
+import { X, Link as LinkIcon, Wand2, Loader2, DollarSign, Clock, Sliders, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function EditGameModal({ game, onClose, onGameUpdated }) {
@@ -18,14 +18,13 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
   const [loading, setLoading] = useState(false);
   const [fetchingImage, setFetchingImage] = useState(false);
 
-  // --- MAGIC WAND LOGIC ---
   async function fetchGameCover() {
-    if (!formData.title) return alert("Type a game name first!");
+    if (!formData.title) return alert("INPUT_REQUIRED: Enter asset title.");
     
     setFetchingImage(true);
     try {
       const apiKey = import.meta.env.VITE_RAWG_API_KEY;
-      if (!apiKey) return alert("Missing API Key!");
+      if (!apiKey) return alert("SysErr: MISSING_API_KEY");
 
       const response = await fetch(`https://api.rawg.io/api/games?key=${apiKey}&search=${formData.title}&page_size=1`);
       const data = await response.json();
@@ -33,11 +32,11 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
       if (data.results && data.results.length > 0) {
         setFormData(prev => ({ ...prev, cover_url: data.results[0].background_image }));
       } else {
-        alert("No game found! Try checking the spelling.");
+        alert("SCAN_RESULT: Negative. Check spelling.");
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to fetch image.");
+      alert("NET_ERR: Connection failed.");
     } finally {
       setFetchingImage(false);
     }
@@ -59,11 +58,7 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
         return_date: formData.return_date || null
       };
 
-      const { error } = await supabase
-        .from('games')
-        .update(updates)
-        .eq('id', game.id);
-
+      const { error } = await supabase.from('games').update(updates).eq('id', game.id);
       if (error) throw error;
 
       onGameUpdated();
@@ -75,170 +70,167 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
     }
   }
 
-  // PORTAL: Teleports this UI to document.body
   return createPortal(
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-      <div className="bg-slate-900 w-full max-w-md p-6 rounded-3xl border border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
-          <X size={24} />
-        </button>
-
-        <h2 className="text-2xl font-bold text-white mb-6">Edit Game Details</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="fixed inset-0 bg-void-900/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
+      <div className="bg-void-800 w-full max-w-md p-1 clip-chamfer shadow-2xl shadow-cyber/20 relative">
+        <div className="bg-void-800 border border-white/10 p-6 h-full clip-chamfer max-h-[90vh] overflow-y-auto custom-scrollbar">
           
-          {/* TITLE */}
-          <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Title</label>
-            <div className="relative">
+          <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-flux transition z-10 hover:rotate-90 duration-300">
+            <X size={24} />
+          </button>
+
+          <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+            <Sliders className="text-cyber animate-spin-slow" size={24} />
+            <h2 className="text-2xl font-mech font-bold text-white tracking-widest uppercase">
+              Modify <span className="text-cyber">Parameters</span>
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            <div className="group">
+              <label className="block text-cyber/80 text-[10px] font-mech font-bold uppercase tracking-widest mb-1">Asset Designation</label>
               <input
                 value={formData.title}
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none transition"
+                className="w-full bg-void-950 text-white font-code p-3 border border-void-700 focus:border-cyber outline-none transition-all clip-chamfer"
               />
             </div>
-          </div>
 
-          {/* COVER URL + MAGIC WAND */}
-          <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cover Image URL</label>
-            <div className="relative mb-2">
-              <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
-              
-              <input
-                value={formData.cover_url}
-                onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
-                className="w-full bg-slate-950 text-white pl-10 pr-12 py-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none placeholder:text-slate-600"
-                placeholder="Click the magic wand to auto-fill →"
-              />
-              
-              {/* Magic Wand Button */}
-              <button
-                type="button"
-                onClick={fetchGameCover}
-                disabled={fetchingImage || !formData.title}
-                className="absolute right-2 top-2 p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition disabled:opacity-50"
-                title="Auto-fetch Cover Art"
-              >
-                {fetchingImage ? <Loader2 className="animate-spin" size={16} /> : <Wand2 size={16} />}
-              </button>
-            </div>
-            
-            {formData.cover_url && (
-              <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-800 relative group">
-                <img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition" />
-              </div>
-            )}
-          </div>
-
-          {/* PLATFORM & STATUS ROW */}
-          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Platform</label>
-              <select
-                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none cursor-pointer"
-                value={formData.platform}
-                onChange={e => setFormData({ ...formData, platform: e.target.value })}
-              >
-                <option value="PC">PC</option>
-                <option value="PS5">PlayStation 5</option>
-                <option value="PS4">PlayStation 4</option>
-                <option value="Xbox">Xbox Series X/S</option>
-                <option value="Switch">Nintendo Switch</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status</label>
-              <select
-                className="w-full bg-slate-950 text-white p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none appearance-none cursor-pointer"
-                value={formData.listing_type}
-                onChange={e => setFormData({ ...formData, listing_type: e.target.value })}
-              >
-                <optgroup label="Active">
-                  <option value="Library">Collection Only</option>
-                  <option value="Rent">Available for Rent</option>
-                  <option value="Sale">Available for Sale</option>
-                </optgroup>
-                <optgroup label="Lifecycle">
-                  <option value="Rented Out">Rented Out (Away)</option>
-                  <option value="Rented In">Rented In (Borrowed)</option>
-                  <option value="Sold">Sold (History)</option>
-                </optgroup>
-              </select>
-            </div>
-          </div>
-
-          {/* DYNAMIC TRACKING FIELDS */}
-          <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50 space-y-3 animate-in slide-in-from-top-2">
-            
-            {/* 1. LISTING PRICE (Rent/Sale) */}
-            {['Rent', 'Sale'].includes(formData.listing_type) && (
-              <div>
-                <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
-                  {formData.listing_type === 'Rent' ? 'Weekly Price ($)' : 'Sale Price ($)'}
-                </label>
-                <input required type="number" min="0" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-slate-700" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+              <label className="block text-slate-500 text-[10px] font-mech font-bold uppercase tracking-widest mb-1">Visual Data Source</label>
+              <div className="relative mb-3">
+                <LinkIcon className="absolute left-3 top-3.5 text-slate-600" size={16} />
+                <input
+                  value={formData.cover_url}
+                  onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
+                  className="w-full bg-void-950 text-white font-code pl-10 pr-12 py-3 border border-void-700 focus:border-cyber outline-none transition-all placeholder:text-void-700 clip-chamfer"
+                  placeholder="Image URL..."
+                />
+                <button
+                  type="button"
+                  onClick={fetchGameCover}
+                  disabled={fetchingImage || !formData.title}
+                  className="absolute right-2 top-2 p-1.5 bg-cyber/10 hover:bg-cyber text-cyber hover:text-black border border-cyber/30 rounded-none transition disabled:opacity-50"
+                >
+                  {fetchingImage ? <Loader2 className="animate-spin" size={16} /> : <Wand2 size={16} />}
+                </button>
               </div>
-            )}
-
-            {/* 2. PURCHASE DETAILS (Library) */}
-            {formData.listing_type === 'Library' && (
-              <div className="flex gap-4">
-                <div className="w-1/2">
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Bought Price</label>
-                  <div className="relative"><DollarSign className="absolute left-2 top-2.5 text-slate-600" size={12} />
-                  <input type="number" className="w-full bg-slate-900 text-white pl-6 p-2 rounded-lg border border-slate-700 text-sm" placeholder="0.00" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
-                  </div>
+              
+              {formData.cover_url && (
+                <div className="h-32 w-full overflow-hidden border border-void-700 relative group bg-void-950">
+                  <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
+                  <img src={formData.cover_url} alt="Preview" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition duration-500" />
                 </div>
-                <div className="w-1/2">
-                  <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Bought Date</label>
-                  <input type="date" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-slate-700 text-sm" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* 3. RETURN DEADLINE (Rented In/Out) - OPTIONAL */}
-            {(formData.listing_type === 'Rented Out' || formData.listing_type === 'Rented In') && (
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-indigo-400 text-xs font-bold uppercase mb-1">
-                  {formData.listing_type === 'Rented Out' ? 'Expected Return Date (Optional)' : 'Return Deadline (Optional)'}
-                </label>
+                <label className="block text-slate-500 text-[10px] font-mech font-bold uppercase tracking-widest mb-1">Platform</label>
                 <div className="relative">
-                   <Clock className="absolute left-2 top-2.5 text-indigo-500" size={14} />
-                   <input type="date" className="w-full bg-slate-900 text-white pl-8 p-2 rounded-lg border border-indigo-500/30 text-sm" value={formData.return_date} onChange={e => setFormData({ ...formData, return_date: e.target.value })} />
+                  <select
+                    className="w-full bg-void-950 text-white font-code p-3 border border-void-700 focus:border-cyber outline-none appearance-none cursor-pointer clip-chamfer"
+                    value={formData.platform}
+                    onChange={e => setFormData({ ...formData, platform: e.target.value })}
+                  >
+                    <option value="PC">PC_TERM</option>
+                    <option value="PS5">PS5_CORE</option>
+                    <option value="PS4">PS4_LEGACY</option>
+                    <option value="Xbox">XBOX_SERIES</option>
+                    <option value="Switch">NINTENDO_SW</option>
+                  </select>
+                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
                 </div>
               </div>
-            )}
+              <div>
+                <label className="block text-slate-500 text-[10px] font-mech font-bold uppercase tracking-widest mb-1">Protocol</label>
+                <div className="relative">
+                  <select
+                    className="w-full bg-void-950 text-white font-code p-3 border border-void-700 focus:border-cyber outline-none appearance-none cursor-pointer clip-chamfer"
+                    value={formData.listing_type}
+                    onChange={e => setFormData({ ...formData, listing_type: e.target.value })}
+                  >
+                    <option value="Library">VAULT_STORE</option>
+                    <option value="Rent">RENT_PROTOCOL</option>
+                    <option value="Sale">SALE_PROTOCOL</option>
+                    <option value="Rented Out">STATUS_AWAY</option>
+                    <option value="Rented In">STATUS_BORROWED</option>
+                    <option value="Sold">STATUS_SOLD</option>
+                  </select>
+                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
+                </div>
+              </div>
+            </div>
 
-            {/* 4. SOLD DETAILS */}
-            {formData.listing_type === 'Sold' && (
-              <div className="flex gap-4">
-                <div className="w-1/2">
-                  <label className="block text-green-500 text-[10px] font-bold uppercase mb-1">Sold Price</label>
-                  <div className="relative"><DollarSign className="absolute left-2 top-2.5 text-green-600" size={12} />
-                  <input type="number" className="w-full bg-slate-900 text-white pl-6 p-2 rounded-lg border border-green-500/30 text-sm" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+            <div className="bg-void-900/50 p-4 border border-white/5 space-y-3 animate-in slide-in-from-top-2 clip-chamfer">
+              {['Rent', 'Sale'].includes(formData.listing_type) && (
+                <div>
+                  <label className="block text-cyber text-[10px] font-bold uppercase mb-1">
+                    {formData.listing_type === 'Rent' ? 'Weekly Rate ($)' : 'Credits Required ($)'}
+                  </label>
+                  <input required type="number" min="0" className="w-full bg-void-950 text-white font-code p-2 border border-cyber/30 focus:border-cyber outline-none" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                </div>
+              )}
+
+              {formData.listing_type === 'Library' && (
+                <div className="flex gap-4">
+                  <div className="w-1/2">
+                    <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Acquisition Cost</label>
+                    <div className="relative">
+                       <DollarSign className="absolute left-2 top-2.5 text-slate-600" size={12} />
+                       <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-void-700 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="w-1/2">
+                    <label className="block text-slate-500 text-[10px] font-bold uppercase mb-1">Date</label>
+                    <input type="date" className="w-full bg-void-950 text-white p-2 border border-void-700 text-sm font-code" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
                   </div>
                 </div>
-                <div className="w-1/2">
-                  <label className="block text-green-500 text-[10px] font-bold uppercase mb-1">Sold Date</label>
-                  <input type="date" className="w-full bg-slate-900 text-white p-2 rounded-lg border border-green-500/30 text-sm" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
+              )}
+
+              {(formData.listing_type === 'Rented Out' || formData.listing_type === 'Rented In') && (
+                <div>
+                  <label className="block text-plasma text-[10px] font-bold uppercase mb-1">Return Deadline</label>
+                  <div className="relative">
+                     <Clock className="absolute left-2 top-2.5 text-plasma" size={14} />
+                     <input type="date" className="w-full bg-void-950 text-white pl-8 p-2 border border-plasma/50 text-sm font-code" value={formData.return_date} onChange={e => setFormData({ ...formData, return_date: e.target.value })} />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-          </div>
+              {formData.listing_type === 'Sold' && (
+                <div className="flex gap-4">
+                  <div className="w-1/2">
+                    <label className="block text-emerald-500 text-[10px] font-bold uppercase mb-1">Credits Received</label>
+                    <div className="relative">
+                       <DollarSign className="absolute left-2 top-2.5 text-emerald-600" size={12} />
+                       <input type="number" className="w-full bg-void-950 text-white pl-6 p-2 border border-emerald-500/30 text-sm font-code" value={formData.transaction_price} onChange={e => setFormData({ ...formData, transaction_price: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="w-1/2">
+                    <label className="block text-emerald-500 text-[10px] font-bold uppercase mb-1">Date</label>
+                    <input type="date" className="w-full bg-void-950 text-white p-2 border border-emerald-500/30 text-sm font-code" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} />
+                  </div>
+                </div>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl mt-4 transition shadow-lg shadow-indigo-600/20 disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </form>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="group w-full relative overflow-hidden bg-cyber/10 border border-cyber text-cyber font-mech font-bold tracking-widest py-4 mt-4 transition-all hover:bg-cyber hover:text-black hover:shadow-neon-cyan disabled:opacity-50 clip-chamfer"
+            >
+               <span className="relative z-10 flex items-center justify-center gap-2">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                {loading ? 'OVERWRITING...' : 'SAVE CONFIGURATION'}
+              </span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>,
-    document.body // <--- RENDER TO BODY
+    document.body
   );
 }

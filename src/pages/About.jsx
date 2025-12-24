@@ -1,172 +1,103 @@
-import { Link } from 'react-router-dom'; // <--- Import Link
-import { Gamepad2, Users, ArrowRightLeft, Shield, Globe, Zap, Heart, ShoppingBag, Archive, MessageCircle, UserCircle, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Gamepad2, Users, ArrowRightLeft, Shield, Globe, Zap, Heart, ShoppingBag, Archive, MessageCircle, UserCircle, MapPin, Cpu } from 'lucide-react';
 
 export default function About() {
   return (
-    <div className="max-w-6xl mx-auto space-y-24 py-12 animate-in fade-in duration-700 px-6">
+    <div className="max-w-7xl mx-auto space-y-24 py-12 pt-28 px-6 pb-40">
       
-      {/* 1. HERO SECTION */}
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-bold uppercase tracking-wider border border-indigo-500/20">
-          <Zap size={16} /> The Future of Game Trading
+      {/* 1. HERO */}
+      <div className="text-center relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyber/10 blur-[100px] rounded-full pointer-events-none" />
+        
+        <div className="inline-flex items-center gap-2 px-4 py-1 mb-6 border border-cyber/30 bg-cyber/5 clip-chamfer">
+          <Zap size={14} className="text-cyber" /> 
+          <span className="text-[10px] font-code font-bold text-cyber uppercase tracking-[0.2em]">System Version 2.0</span>
         </div>
-        <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400">
-          We Are GameRoam.
+        
+        <h1 className="text-6xl md:text-8xl font-mech font-bold text-white mb-6 uppercase tracking-tighter leading-none">
+          Game<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber to-purple-600">Roam</span>
         </h1>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          The ultimate decentralized ecosystem for gamers to trade physical copies, share digital experiences, and build a reputation in a village built by gamers, for gamers.
+        
+        <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto font-ui leading-relaxed">
+          The decentralized trading grid for operators, collectors, and gamers. 
+          <span className="text-white block mt-2">Secure. Local. Encrypted.</span>
         </p>
       </div>
 
-      {/* 2. FEATURE BREAKDOWN (Clickable Cards) */}
-      <div className="space-y-10">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-white">Explore the Ecosystem</h2>
-          <p className="text-slate-400 mt-2">Everything you need to manage your gaming life in one place.</p>
+      {/* 2. MODULE GRID */}
+      <div className="space-y-12">
+        <div className="flex items-center gap-4 mb-8">
+           <Cpu className="text-cyber" size={24} />
+           <h2 className="text-2xl font-mech font-bold text-white uppercase tracking-widest">System Modules</h2>
+           <div className="h-px bg-white/10 flex-1" />
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Marketplace Link */}
-          <Link to="/marketplace" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition duration-300 group hover:bg-slate-900/60 block">
-            <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 mb-4 group-hover:scale-110 transition">
-              <ShoppingBag size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">The Marketplace</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Buy, sell, or trade physical games directly with locals. Filter by platform, price, or location. No hidden fees, just pure peer-to-peer trading.
-            </p>
-          </Link>
-
-          {/* The Village Link */}
-          <Link to="/community" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-pink-500/50 transition duration-300 group hover:bg-slate-900/60 block">
-            <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center text-pink-400 mb-4 group-hover:scale-110 transition">
-              <Users size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-pink-400 transition">The Village</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Our community hub. Share your latest achievements, ask for game recommendations, or find a squad. It’s social media, but strictly for gamers.
-            </p>
-          </Link>
-
-          {/* My Vault Link */}
-          <Link to="/vault" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-emerald-500/50 transition duration-300 group hover:bg-slate-900/60 block">
-            <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
-              <Archive size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition">My Vault</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Your personal inventory management system.
-            </p>
-            <ul className="mt-3 space-y-1 text-xs text-slate-500">
-              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-slate-600 rounded-full"></span> <b>Library:</b> Catalog games you own.</li>
-              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> <b>Sale:</b> List items for cash.</li>
-              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span> <b>Rent:</b> Lend games for weekly income.</li>
-            </ul>
-          </Link>
-
-          {/* Messages Link */}
-          <Link to="/chat" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 transition duration-300 group hover:bg-slate-900/60 block">
-            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition">
-              <MessageCircle size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition">Secure Chat</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Negotiate prices, arrange safe meetup spots, or just chat about games. Share images and videos directly within the conversation.
-            </p>
-          </Link>
-
-          {/* Profile Link */}
-          <Link to="/profile" className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-purple-500/50 transition duration-300 group hover:bg-slate-900/60 block">
-            <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
-              <UserCircle size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition">Your Identity</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Build your reputation. Your profile showcases your public vault, your "Gamer Bio", and your standing in the community.
-            </p>
-          </Link>
-
-          {/* Location Based (No Link, just info) */}
-          <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800 hover:border-orange-500/50 transition duration-300 group">
-            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-400 mb-4 group-hover:scale-110 transition">
-              <MapPin size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Local First</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              We prioritize connections near you. Save on shipping and meet fellow gamers in your city to exchange physical discs instantly.
-            </p>
-          </div>
-
+          {[
+            { to: "/marketplace", icon: ShoppingBag, title: "Global Exchange", desc: "Acquire physical assets. No fees. Peer-to-peer protocols active.", color: "text-cyber" },
+            { to: "/community", icon: Users, title: "Sector Comms", desc: "The Village hub. Share intel, find squads, and broadcast achievements.", color: "text-purple-400" },
+            { to: "/vault", icon: Archive, title: "Secure Vault", desc: "Inventory management for your physical and digital library.", color: "text-emerald-400" },
+            { to: "/chat", icon: MessageCircle, title: "Encrypted Chat", desc: "Private frequency for asset negotiation and tactical coordination.", color: "text-blue-400" },
+            { to: "/profile", icon: UserCircle, title: "Operator ID", desc: "Build your reputation. Track service records and mission logs.", color: "text-pink-400" },
+            { icon: MapPin, title: "Local Grid", desc: "Proximity-based matchmaking for faster asset transfer.", color: "text-orange-400" } // No Link
+          ].map((item, idx) => (
+             item.to ? (
+               <Link key={idx} to={item.to} className="bg-void-800 border border-white/5 clip-chamfer p-1 group hover:border-cyber/50 transition duration-300">
+                  <div className="bg-void-900 h-full p-8 clip-chamfer flex flex-col items-start relative overflow-hidden">
+                    <item.icon size={32} className={`${item.color} mb-4`} />
+                    <h3 className="text-xl font-mech font-bold text-white uppercase mb-2 group-hover:text-cyber transition">{item.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                    <div className="absolute bottom-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
+                       <item.icon size={64} />
+                    </div>
+                  </div>
+               </Link>
+             ) : (
+               <div key={idx} className="bg-void-800 border border-white/5 clip-chamfer p-1 group">
+                  <div className="bg-void-900 h-full p-8 clip-chamfer flex flex-col items-start relative overflow-hidden">
+                    <item.icon size={32} className={`${item.color} mb-4`} />
+                    <h3 className="text-xl font-mech font-bold text-white uppercase mb-2">{item.title}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                  </div>
+               </div>
+             )
+          ))}
         </div>
       </div>
 
-      {/* 3. MISSION & VISION GRID (Unchanged from here down) */}
-      <div className="grid md:grid-cols-2 gap-8 pt-10 border-t border-slate-800/50">
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-10 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Our Mission</h2>
-          <p className="text-slate-300 text-lg leading-relaxed mb-6">
-            To democratize access to gaming experiences. We believe that a game finished shouldn't gather dust on a shelf. It should be passed on, played, and loved by someone else. We are building the infrastructure to make peer-to-peer trading safe, local, and community-driven.
-          </p>
-          <div className="flex items-center gap-4 text-indigo-400 font-bold">
-            <Globe size={20} />
-            <span>Connecting players globally</span>
+      {/* 3. CORE PROTOCOLS */}
+      <div className="grid md:grid-cols-2 gap-8 pt-10 border-t border-white/5">
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
+          <div className="bg-void-900 p-10 h-full clip-chamfer flex flex-col justify-center">
+            <h2 className="text-3xl font-mech font-bold text-white mb-6 uppercase">Primary Objective</h2>
+            <p className="text-slate-300 text-lg leading-relaxed mb-6 font-ui">
+              "To decentralize the gaming economy. Assets should not decay in isolation; they must be circulated to maintain value."
+            </p>
+            <div className="flex items-center gap-4 text-cyber font-bold font-code text-xs uppercase tracking-widest">
+              <Globe size={16} />
+              <span>Global Connectivity Established</span>
+            </div>
           </div>
         </div>
         
         <div className="space-y-4">
-          <div className="bg-slate-900/30 p-8 rounded-2xl border border-slate-800/60 hover:border-indigo-500/30 transition duration-300">
-            <ArrowRightLeft className="text-emerald-400 mb-4" size={32} />
-            <h3 className="text-white font-bold text-xl mb-2">Circular Economy</h3>
-            <p className="text-slate-400">Reduce e-waste by giving physical game discs a second, third, or fourth life within your local community.</p>
+          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer">
+            <div className="flex items-center gap-4 mb-3">
+               <ArrowRightLeft className="text-emerald-400" size={24} />
+               <h3 className="text-white font-mech font-bold text-xl uppercase">Circular Economy</h3>
+            </div>
+            <p className="text-slate-400 text-sm">Recycle physical media. Reduce waste. Maximize utility.</p>
           </div>
-          <div className="bg-slate-900/30 p-8 rounded-2xl border border-slate-800/60 hover:border-indigo-500/30 transition duration-300">
-            <Shield className="text-indigo-400 mb-4" size={32} />
-            <h3 className="text-white font-bold text-xl mb-2">Trust & Safety</h3>
-            <p className="text-slate-400">A reputation-based system ensures you know exactly who you are trading with before you meet.</p>
+          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer">
+             <div className="flex items-center gap-4 mb-3">
+               <Shield className="text-cyber" size={24} />
+               <h3 className="text-white font-mech font-bold text-xl uppercase">Trust Protocol</h3>
+            </div>
+            <p className="text-slate-400 text-sm">Reputation-based verification ensures secure asset transfer.</p>
           </div>
         </div>
       </div>
-
-      {/* 4. CORE VALUES */}
-      <div>
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Why the Community Chooses Us</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
-              <Users size={100} />
-            </div>
-            <Users className="text-pink-500 mb-6" size={40} />
-            <h3 className="text-xl font-bold text-white mb-3">Community First</h3>
-            <p className="text-slate-400 leading-relaxed">
-              We aren't just a marketplace. We are a social network where you can discuss lore, share clips, and find your squad.
-            </p>
-          </div>
-
-          <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
-              <Gamepad2 size={100} />
-            </div>
-            <Gamepad2 className="text-indigo-500 mb-6" size={40} />
-            <h3 className="text-xl font-bold text-white mb-3">For Hardcore & Casuals</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Whether you are a speedrunner looking for retro gems or a casual player swapping the latest AAA title, you belong here.
-            </p>
-          </div>
-
-          <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
-              <Heart size={100} />
-            </div>
-            <Heart className="text-red-500 mb-6" size={40} />
-            <h3 className="text-xl font-bold text-white mb-3">Passion Project</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Built by a solo developer who was tired of unfair trade-in values at retail stores. We put value back in your pocket.
-            </p>
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 }

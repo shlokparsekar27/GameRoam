@@ -1,85 +1,85 @@
-import { Gavel, AlertTriangle, UserCheck, ShieldAlert } from 'lucide-react';
+import { Gavel, AlertTriangle, UserCheck, ShieldAlert, FileWarning, Scale } from 'lucide-react';
 
 export default function Terms() {
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 text-slate-300 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto py-12 pt-28 px-4 text-slate-300 animate-in fade-in duration-500 pb-20">
 
       {/* Header */}
-      <div className="mb-12 border-b border-slate-800 pb-8">
-        <h1 className="text-4xl font-extrabold text-white mb-4">Terms & Conditions</h1>
-        <p className="text-slate-400">Last updated: {new Date().toLocaleDateString()}</p>
-        <p className="mt-4 text-lg text-slate-300">
-          Welcome to GameRoam. By accessing our website, you agree to these terms. Please read them carefully.
+      <div className="mb-12 border-b border-white/5 pb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-flux/10 border border-flux/20 clip-chamfer mb-4">
+          <FileWarning className="text-flux" size={14} />
+          <span className="text-[10px] font-code font-bold text-flux uppercase tracking-widest">Mandatory Compliance</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-mech font-bold text-white mb-4 uppercase">Operator Agreement</h1>
+        <p className="text-slate-500 font-code text-xs uppercase tracking-wide">
+          By accessing the GameRoam Grid, you agree to these terms.
         </p>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-8">
 
         {/* Section 1 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <UserCheck className="text-indigo-500" size={24} /> 1. User Responsibilities
+        <div className="bg-void-900 border-l-4 border-cyber p-6 clip-chamfer">
+          <h2 className="text-lg font-mech font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <UserCheck className="text-cyber" size={20} /> 1. Operator Eligibility
           </h2>
-          <p>By creating an account, you agree that:</p>
-          <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-            <li>You are at least 13 years of age.</li>
-            <li>You will provide accurate information about yourself and the items you list.</li>
-            <li>You are solely responsible for keeping your account password secure.</li>
-            <li>You will not use the platform for any illegal activities or to harass others.</li>
+          <ul className="list-disc pl-6 space-y-2 marker:text-cyber text-sm font-code text-slate-400">
+            <li>Must be Minimum Level 13 (Age 13+).</li>
+            <li>Must provide accurate telemetry data regarding assets.</li>
+            <li>Account credentials must be secured. Unauthorized access is your liability.</li>
           </ul>
-        </section>
+        </div>
 
         {/* Section 2 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Gavel className="text-indigo-500" size={24} /> 2. Marketplace & Trading Rules
+        <div className="bg-void-900 border-l-4 border-purple-500 p-6 clip-chamfer">
+          <h2 className="text-lg font-mech font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <Scale className="text-purple-500" size={20} /> 2. Exchange Regulations
           </h2>
-          <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
-            <p className="mb-4 text-white font-medium">GameRoam acts as a venue for users to connect. We are not a direct party to transactions.</p>
-            <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-              <li><strong>Honesty:</strong> Sellers must accurately describe the condition of games (e.g., scratches, missing manuals).</li>
-              <li><strong>Safety:</strong> When meeting for local trades, always meet in a public, safe location.</li>
-              <li><strong>Disputes:</strong> GameRoam is not liable for items that are lost, damaged, or not as described during a peer-to-peer exchange.</li>
-              <li><strong>Prohibited Items:</strong> You may only list video games and related peripherals. Illegal items, pirated software, or non-gaming content will be removed.</li>
+          <div className="bg-void-950 p-4 border border-white/5 clip-chamfer text-sm font-ui text-slate-400">
+            <p className="mb-4">GameRoam is a neutral venue. We do not oversee physical handovers.</p>
+            <ul className="list-disc pl-6 space-y-2 marker:text-purple-500">
+              <li><strong className="text-white">INTEGRITY:</strong> Asset condition (scratches, manuals) must be logged accurately.</li>
+              <li><strong className="text-white">SAFETY:</strong> Local exchanges must occur in secure, public sectors.</li>
+              <li><strong className="text-white">CONTRABAND:</strong> Only video game assets permitted. Illegal/Pirated goods will result in immediate ban.</li>
             </ul>
           </div>
-        </section>
+        </div>
 
         {/* Section 3 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <AlertTriangle className="text-indigo-500" size={24} /> 3. Content Guidelines
+        <div className="bg-void-900 border-l-4 border-flux p-6 clip-chamfer">
+          <h2 className="text-lg font-mech font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <AlertTriangle className="text-flux" size={20} /> 3. Comms Discipline
           </h2>
-          <p>
-            GameRoam encourages open discussion in "The Village", but we have zero tolerance for:
+          <p className="text-sm font-ui mb-3 text-slate-400">
+            Zero tolerance policy for the following violations:
           </p>
-          <ul className="list-disc pl-6 space-y-2 marker:text-indigo-500">
-            <li>Hate speech, racism, or discrimination of any kind.</li>
-            <li>Explicit sexual content or gore.</li>
-            <li>Spamming, phishing, or malicious links.</li>
+          <ul className="list-disc pl-6 space-y-2 marker:text-flux text-sm font-code text-slate-400">
+            <li>Hate speech or discrimination.</li>
+            <li>Posting explicit or gore content.</li>
+            <li>Phishing or malicious data injection.</li>
           </ul>
-          <p className="text-sm text-slate-500 mt-2">
-            Violation of these guidelines will result in immediate account suspension or termination.
+          <p className="text-[10px] font-code text-flux mt-4 uppercase tracking-widest">
+            **VIOLATION RESULTS IN IMMEDIATE TERMINATION OF SIGNAL.**
           </p>
-        </section>
+        </div>
 
         {/* Section 4 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ShieldAlert className="text-indigo-500" size={24} /> 4. Limitation of Liability
+        <div className="bg-void-900 border-l-4 border-slate-600 p-6 clip-chamfer">
+          <h2 className="text-lg font-mech font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <ShieldAlert className="text-slate-400" size={20} /> 4. Liability Protocols
           </h2>
-          <p>
-            To the fullest extent permitted by law, GameRoam shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the service or any interactions with other users of the service.
+          <p className="text-sm font-ui text-slate-400 leading-relaxed">
+            GameRoam Systems is not liable for indirect, incidental, or consequential damages resulting from user interactions or asset exchanges.
           </p>
-        </section>
+        </div>
 
         {/* Section 5 */}
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white">5. Changes to Terms</h2>
-          <p>
-            We reserve the right to modify these terms at any time. We will notify users of significant changes via the platform. Continued use of GameRoam constitutes acceptance of the new terms.
+        <div className="bg-void-900 border-l-4 border-slate-600 p-6 clip-chamfer">
+          <h2 className="text-lg font-mech font-bold text-white mb-2 uppercase tracking-wider">5. Protocol Updates</h2>
+          <p className="text-sm font-ui text-slate-400">
+            We reserve the right to patch these terms. Continued use of the grid constitutes acceptance of new protocols.
           </p>
-        </section>
+        </div>
 
       </div>
     </div>

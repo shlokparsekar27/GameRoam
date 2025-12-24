@@ -8,6 +8,7 @@ import Auth from './components/Auth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop'; 
+import CommandPalette from './components/CommandPalette'; // <--- NEW IMPORT
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -22,7 +23,7 @@ import About from './pages/About';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 
-// --- NEW COMPONENT: Handles the "Returning User" Logic ---
+// --- HANDLER: Returning User Logic ---
 function RedirectHandler({ isReturningUser }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,31 +44,29 @@ export default function App() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // New state to track if the session was restored (Returning User) vs Fresh Login
+  // Track if session was restored (vs fresh login)
   const [isReturningUser, setIsReturningUser] = useState(false);
 
   useEffect(() => {
-    // 1. Check for existing session (Page Refresh / New Tab)
+    // 1. Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         fetchUserProfile(session.user.id);
-        setIsReturningUser(true); // <--- They were already logged in!
+        setIsReturningUser(true);
       } else {
         setLoading(false);
       }
     });
 
-    // 2. Listen for Auth Changes (Login / Logout)
+    // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       if (session) {
         fetchUserProfile(session.user.id);
-        // If the event is SIGNED_IN, it means they just clicked "Login", so we keep isReturningUser = false
-        // This ensures they see the "About" page first, as you requested.
       } else {
         setUserProfile(null);
-        setIsReturningUser(false); // Reset on logout
+        setIsReturningUser(false);
         setLoading(false);
       }
     });
@@ -88,8 +87,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center text-white">
-        <Loader2 className="animate-spin text-indigo-500" size={40} />
+      <div className="min-h-screen bg-void-950 flex items-center justify-center text-white">
+        <Loader2 className="animate-spin text-cyber" size={48} />
       </div>
     );
   }
@@ -99,13 +98,24 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      {/* Handles the redirect logic inside the Router context */}
       <RedirectHandler isReturningUser={isReturningUser} />
       
-      <div className="min-h-screen bg-[#020617] text-white font-sans flex flex-col">
+      {/* GLOBAL COMMAND PALETTE */}
+      <CommandPalette />
+      
+      {/* CORE LAYOUT WRAPPER 
+         - Applied 'font-ui' and 'bg-void-900' globally.
+         - 'selection:bg-cyber' makes text highlighting look tactical.
+      */}
+      <div className="min-h-screen bg-void-900 text-slate-300 font-ui flex flex-col relative selection:bg-cyber selection:text-black">
+        
         <Navbar session={session} profile={userProfile} />
         
-        <div className="max-w-7xl mx-auto p-6 md:p-12 w-full flex-1">
+        {/* MAIN VIEWPORT 
+            - Removed 'max-w-7xl' and padding here because pages now control their own layout containers.
+            - Added 'relative z-10' to ensure content sits above any background effects.
+        */}
+        <main className="flex-1 w-full relative z-10">
           <Routes>
             <Route path="/" element={<About />} />
             <Route path="/vault" element={<Dashboard session={session} />} />
@@ -124,7 +134,7 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
           </Routes>
-        </div>
+        </main>
 
         <Footer />
       </div>

@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Send, Paperclip, Loader2, Trash2, Check, CheckCheck, MoreVertical, ArrowLeft, XCircle } from 'lucide-react';
+import { Send, Paperclip, Loader2, Trash2, Check, CheckCheck, MoreVertical, ArrowLeft, XCircle, Shield, Radio } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // --- MEDIA COMPONENT ---
-// 1. CHANGED: Added 'onLoaded' prop to trigger scroll when image/video is ready
 const MediaMessage = ({ path, onLoaded }) => {
   const [mediaUrl, setMediaUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +21,7 @@ const MediaMessage = ({ path, onLoaded }) => {
     if (path) download();
   }, [path]);
 
-  if (loading) return <div className="text-xs text-slate-500">Loading...</div>;
+  if (loading) return <div className="text-[10px] text-cyber font-code animate-pulse">DOWNLOADING_ASSET...</div>;
   if (!mediaUrl) return null;
 
   const isVideo = path.match(/\.(mp4|webm|ogg)$/i);
@@ -30,16 +29,16 @@ const MediaMessage = ({ path, onLoaded }) => {
     <video 
       src={mediaUrl} 
       controls 
-      className="max-w-full max-h-[250px] rounded-lg mt-2 bg-black/20"
-      onLoadedData={onLoaded} // <--- Trigger scroll when video metadata loads
+      className="max-w-full max-h-[250px] clip-chamfer mt-2 border border-white/10 bg-black"
+      onLoadedData={onLoaded}
     />
   ) : (
     <img 
       src={mediaUrl} 
       alt="Shared" 
-      className="max-w-full max-h-[250px] rounded-lg mt-2 cursor-pointer object-cover" 
+      className="max-w-full max-h-[250px] clip-chamfer mt-2 cursor-pointer object-cover border border-white/10 hover:border-cyber/50 transition" 
       onClick={() => window.open(mediaUrl)} 
-      onLoad={onLoaded} // <--- Trigger scroll when image loads
+      onLoad={onLoaded}
     />
   );
 };
@@ -58,50 +57,29 @@ export default function Chat({ session }) {
   const fileInputRef = useRef(null);
   const myId = session.user.id;
 
-  // 1. Load User & Messages + Realtime Subscription
   useEffect(() => {
     if (!receiverId) return;
 
-    // Fetch Receiver Profile
     supabase.from('profiles').select('*').eq('id', receiverId).single()
       .then(({ data }) => setReceiver(data));
 
     fetchMessages();
     markAsRead();
 
-    // Subscribe to Realtime Updates
     const channel = supabase.channel(`chat_room:${receiverId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
-        
-        // --- SAFEGUARD LOGIC ---
         const eventType = payload.eventType;
         const newRecord = payload.new;
         
-        // 1. Handle INSERT (New Message)
         if (eventType === 'INSERT' && newRecord) {
-          if (
-            (newRecord.sender_id === receiverId && newRecord.receiver_id === myId) || 
-            (newRecord.sender_id === myId && newRecord.receiver_id === receiverId)
-          ) {
+          if ((newRecord.sender_id === receiverId && newRecord.receiver_id === myId) || 
+              (newRecord.sender_id === myId && newRecord.receiver_id === receiverId)) {
             fetchMessages(); 
-            // If they sent it, mark as read immediately
             if (newRecord.sender_id === receiverId) markAsRead();
           }
         }
-
-        // 2. Handle UPDATE (Soft Delete / Read Receipt)
-        if (eventType === 'UPDATE' && newRecord) {
-          if (
-            (newRecord.sender_id === receiverId && newRecord.receiver_id === myId) || 
-            (newRecord.sender_id === myId && newRecord.receiver_id === receiverId)
-          ) {
-             fetchMessages();
-          }
-        }
-
-        // 3. Handle DELETE (Hard Delete / Unsend)
-        if (eventType === 'DELETE') {
-          fetchMessages();
+        if (eventType === 'UPDATE' || eventType === 'DELETE') {
+           fetchMessages();
         }
       })
       .subscribe();
@@ -109,7 +87,6 @@ export default function Chat({ session }) {
     return () => { supabase.removeChannel(channel); };
   }, [receiverId]);
 
-  // 2. NEW: Centralized Scroll Function
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       const { scrollHeight, clientHeight } = chatContainerRef.current;
@@ -117,10 +94,8 @@ export default function Chat({ session }) {
     }
   };
 
-  // 3. CHANGED: Use 'useLayoutEffect' and triggers
   useLayoutEffect(() => {
     scrollToBottom();
-    // Small timeout to catch any layout shifts (standard React Chat trick)
     const timeoutId = setTimeout(scrollToBottom, 100);
     return () => clearTimeout(timeoutId);
   }, [messages]);
@@ -132,7 +107,6 @@ export default function Chat({ session }) {
       .or(`and(sender_id.eq.${myId},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${myId})`)
       .order('created_at', { ascending: true });
 
-    // CLIENT-SIDE FILTERING (The "Soft Delete" Magic)
     const visibleMessages = (data || []).filter(msg => {
       if (msg.sender_id === myId && msg.deleted_by_sender) return false;
       if (msg.receiver_id === myId && msg.deleted_by_receiver) return false;
@@ -146,18 +120,10 @@ export default function Chat({ session }) {
     await supabase.from('messages').update({ is_read: true }).eq('sender_id', receiverId).eq('receiver_id', myId).eq('is_read', false);
   }
 
-  // --- ACTIONS ---
-
   async function handleSendMessage(e) {
     e?.preventDefault();
     if (!newMessage.trim()) return;
-
-    const { error } = await supabase.from('messages').insert({
-      sender_id: myId,
-      receiver_id: receiverId,
-      content: newMessage.trim(),
-    });
-
+    const { error } = await supabase.from('messages').insert({ sender_id: myId, receiver_id: receiverId, content: newMessage.trim() });
     if (!error) setNewMessage('');
   }
 
@@ -169,71 +135,66 @@ export default function Chat({ session }) {
     setUploading(true);
     const { error } = await supabase.storage.from('chat-uploads').upload(path, file);
     if (!error) {
-      await supabase.from('messages').insert({
-        sender_id: myId,
-        receiver_id: receiverId,
-        media_url: path
-      });
+      await supabase.from('messages').insert({ sender_id: myId, receiver_id: receiverId, media_url: path });
     }
     setUploading(false);
   }
 
   async function handleDeleteSingleMessage(msgId, mediaUrl) {
-    if (!confirm("Unsend this message? It will be removed for everyone.")) return;
-    
+    if (!confirm("CONFIRM DELETION: Remove this data packet?")) return;
     await supabase.from('messages').delete().eq('id', msgId);
     if (mediaUrl) await supabase.storage.from('chat-uploads').remove([mediaUrl]);
     setMessages(prev => prev.filter(m => m.id !== msgId));
   }
 
   async function handleClearHistory() {
-    if (!confirm("Clear chat history? This will hide messages for you.")) return;
-    
-    await supabase.from('messages')
-      .update({ deleted_by_sender: true })
-      .eq('sender_id', myId)
-      .eq('receiver_id', receiverId);
-
-    await supabase.from('messages')
-      .update({ deleted_by_receiver: true })
-      .eq('receiver_id', myId)
-      .eq('sender_id', receiverId);
-
+    if (!confirm("PURGE HISTORY: This will wipe your local logs.")) return;
+    await supabase.from('messages').update({ deleted_by_sender: true }).eq('sender_id', myId).eq('receiver_id', receiverId);
+    await supabase.from('messages').update({ deleted_by_receiver: true }).eq('receiver_id', myId).eq('sender_id', receiverId);
     setMessages([]); 
     setShowMenu(false);
   }
 
-  if (!receiver) return <div className="flex-1 flex items-center justify-center text-slate-500"><Loader2 className="animate-spin" /></div>;
+  if (!receiver) return <div className="flex-1 flex items-center justify-center text-cyber font-code text-xs animate-pulse">ESTABLISHING LINK...</div>;
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 relative">
-      
+    <div className="flex flex-col h-full bg-void-950 relative overflow-hidden">
+      {/* Background Grid */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+
       {/* HEADER */}
-      <div className="p-3 md:p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur-md z-10">
+      <div className="p-3 md:p-4 border-b border-white/5 flex justify-between items-center bg-void-900/90 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/chat')} className="md:hidden p-1 -ml-1 text-slate-400 hover:text-white"><ArrowLeft size={22} /></button>
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/user/${receiverId}`)}>
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 overflow-hidden shrink-0">
+          <button onClick={() => navigate('/chat')} className="md:hidden p-1 -ml-1 text-slate-400 hover:text-cyber transition"><ArrowLeft size={20} /></button>
+          
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/user/${receiverId}`)}>
+            <div className="relative w-10 h-10 clip-chamfer bg-void-800 border border-white/10 group-hover:border-cyber/50 transition overflow-hidden">
                {receiver.avatar_url ? (
                  <img src={receiver.avatar_url} className="w-full h-full object-cover" />
                ) : (
-                 <div className="w-full h-full flex items-center justify-center font-bold text-white text-sm">{receiver.username?.[0]}</div>
+                 <div className="w-full h-full flex items-center justify-center font-mech font-bold text-white text-lg">{receiver.username?.[0]}</div>
                )}
+               {/* Online Dot */}
+               <div className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 shadow-[0_0_5px_#10b981]" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-white text-sm md:text-base truncate">{receiver.username}</h3>
-              <p className="text-[10px] md:text-xs text-slate-500">View Profile</p>
+              <h3 className="font-mech font-bold text-white text-sm md:text-base truncate group-hover:text-cyber transition tracking-wide">
+                {receiver.username.toUpperCase()}
+              </h3>
+              <p className="text-[10px] font-code text-emerald-500 flex items-center gap-1">
+                <Shield size={10} /> ENCRYPTED_CONN
+              </p>
             </div>
           </div>
         </div>
 
         {/* Options Menu */}
         <div className="relative">
-          <button onClick={() => setShowMenu(!showMenu)} className="p-2 text-slate-400 hover:text-white"><MoreVertical size={20}/></button>
+          <button onClick={() => setShowMenu(!showMenu)} className="p-2 text-slate-500 hover:text-cyber transition"><MoreVertical size={18}/></button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-20 overflow-hidden">
-              <button onClick={handleClearHistory} className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-slate-800 flex items-center gap-2 transition">
-                <XCircle size={16}/> Clear History
+            <div className="absolute right-0 mt-2 w-48 bg-void-900 border border-void-700 shadow-2xl z-20 clip-chamfer animate-in slide-in-from-top-2">
+              <button onClick={handleClearHistory} className="w-full text-left px-4 py-3 text-xs font-code text-flux hover:bg-flux/10 flex items-center gap-2 transition uppercase tracking-wider">
+                <XCircle size={14}/> PURGE_LOGS
               </button>
             </div>
           )}
@@ -243,7 +204,7 @@ export default function Chat({ session }) {
       {/* MESSAGES LIST */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 scroll-smooth"
+        className="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 custom-scrollbar"
       >
         {messages.map((msg) => {
           const isMe = msg.sender_id === myId;
@@ -255,22 +216,25 @@ export default function Chat({ session }) {
                 {isMe && (
                   <button 
                     onClick={() => handleDeleteSingleMessage(msg.id, msg.media_url)}
-                    className="mb-2 text-slate-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                    title="Unsend Message"
+                    className="mb-2 text-void-600 hover:text-flux opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                    title="Delete Packet"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={12} />
                   </button>
                 )}
 
-                <div className={`rounded-2xl p-3 shadow-sm flex flex-col min-w-[80px] ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'}`}>
-                  {/* 4. PASS THE SCROLL FUNCTION TO MEDIA COMPONENT */}
+                <div className={`clip-chamfer p-3 relative border ${
+                  isMe 
+                    ? 'bg-cyber/10 border-cyber/30 text-white' 
+                    : 'bg-void-800 border-white/10 text-slate-300'
+                }`}>
                   {msg.media_url && <MediaMessage path={msg.media_url} onLoaded={scrollToBottom} />}
                   
-                  {msg.content && <p className="leading-relaxed text-sm md:text-base whitespace-pre-wrap break-words">{msg.content}</p>}
+                  {msg.content && <p className="leading-relaxed text-sm font-ui whitespace-pre-wrap break-words">{msg.content}</p>}
                   
-                  <div className="text-[10px] flex items-center justify-end gap-1 mt-1 opacity-70">
+                  <div className={`text-[9px] font-code flex items-center justify-end gap-1 mt-2 uppercase tracking-wider ${isMe ? 'text-cyber/70' : 'text-slate-600'}`}>
                     {new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    {isMe && (msg.is_read ? <CheckCheck size={12}/> : <Check size={12}/>)}
+                    {isMe && (msg.is_read ? <CheckCheck size={10} className="text-cyber"/> : <Check size={10}/>)}
                   </div>
                 </div>
 
@@ -281,23 +245,26 @@ export default function Chat({ session }) {
       </div>
 
       {/* INPUT AREA */}
-      <div className="p-2 md:p-4 bg-slate-900 border-t border-slate-800">
+      <div className="p-3 bg-void-900 border-t border-white/5">
         <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*,video/*" />
           
-          <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploading} className="p-2 md:p-3 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-xl transition shrink-0">
-            {uploading ? <Loader2 className="animate-spin" size={20}/> : <Paperclip size={20}/>}
+          <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploading} className="p-3 text-slate-500 hover:text-cyber hover:bg-void-800 clip-chamfer transition shrink-0 border border-transparent hover:border-cyber/30">
+            {uploading ? <Loader2 className="animate-spin" size={18}/> : <Paperclip size={18}/>}
           </button>
           
-          <input 
-            value={newMessage} 
-            onChange={e => setNewMessage(e.target.value)} 
-            placeholder="Type a message..." 
-            className="flex-1 bg-slate-950 text-white p-2.5 md:p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none text-sm md:text-base"
-          />
+          <div className="flex-1 relative">
+            <input 
+              value={newMessage} 
+              onChange={e => setNewMessage(e.target.value)} 
+              placeholder="TRANSMIT_DATA..." 
+              className="w-full bg-void-950 text-white font-code p-3 pr-10 border border-void-700 focus:border-cyber outline-none text-sm clip-chamfer placeholder:text-void-700 transition"
+            />
+            {newMessage && <div className="absolute right-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-cyber animate-pulse" />}
+          </div>
           
-          <button type="submit" disabled={!newMessage.trim() || uploading} className="p-2.5 md:p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition disabled:opacity-50 shrink-0">
-            <Send size={20} />
+          <button type="submit" disabled={!newMessage.trim() || uploading} className="p-3 bg-cyber hover:bg-white text-black clip-chamfer transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0 font-bold">
+            <Send size={18} />
           </button>
         </form>
       </div>

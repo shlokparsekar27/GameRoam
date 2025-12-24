@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { 
-  MapPin, Edit2, Save, X, Camera, Loader2, Grid, Archive, Heart, MessageSquare, Gamepad2, Settings, LogOut, Phone, Quote 
+  MapPin, Save, X, Camera, Loader2, Grid, Archive, Heart, Gamepad2, Settings, LogOut, Phone, Cpu, User, Shield
 } from 'lucide-react';
 
 export default function Profile({ session, initialProfile, onProfileUpdate }) {
@@ -12,15 +12,11 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   
-  // Data States
   const [myPosts, setMyPosts] = useState([]);
   const [myListings, setMyListings] = useState([]);
   const [activeTab, setActiveTab] = useState('posts'); 
-
-  // Modal State
   const [selectedGame, setSelectedGame] = useState(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     username: '',
     phone_number: '',
@@ -53,13 +49,9 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
     } catch (error) { console.error(error); }
   }
 
-  // --- UPDATED LOGOUT FUNCTION ---
   const handleLogout = async () => {
-    if (confirm("Are you sure you want to log out?")) {
-      // 1. Navigate to home first to clean up the URL (e.g. remove /profile)
+    if (confirm("CONFIRM: Terminate Session?")) {
       navigate('/');
-      
-      // 2. Then sign out. This triggers App.jsx to switch to <Auth />
       await supabase.auth.signOut();
     }
   };
@@ -91,76 +83,89 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-48 animate-in fade-in duration-700">
+    <div className="max-w-5xl mx-auto px-4 pb-48 pt-28 animate-in fade-in duration-700">
       
-      {/* --- 1. COMPACT PROFILE HEADER --- */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/5 rounded-3xl p-6 md:p-8 mb-10 shadow-2xl relative overflow-hidden">
-        {/* Decor */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      {/* --- 1. OPERATOR DOSSIER HEADER --- */}
+      <div className="bg-void-800 border border-white/5 clip-chamfer p-1 mb-10 relative group">
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
+        {/* Holographic Border Effect */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyber/0 via-cyber/30 to-cyber/0 opacity-0 group-hover:opacity-100 transition duration-1000 blur-sm" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
+        <div className="relative z-10 bg-void-900 clip-chamfer p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start">
           
-          {/* Avatar Area */}
-          <div className="relative group shrink-0">
-             <div className="w-28 h-28 md:w-32 md:h-32 rounded-full p-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-xl shadow-indigo-500/20">
-                <div className="w-full h-full rounded-full bg-slate-900 border-4 border-slate-900 overflow-hidden relative">
-                    {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20"><Loader2 className="animate-spin text-white" /></div>}
+          {/* Avatar Module */}
+          <div className="relative shrink-0 mx-auto md:mx-0">
+             <div className="w-32 h-32 clip-chamfer bg-void-800 border-2 border-white/10 p-1 overflow-hidden relative group-hover:border-cyber/50 transition">
+                <div className="w-full h-full bg-void-950 clip-chamfer overflow-hidden relative">
+                    {uploading && <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20"><Loader2 className="animate-spin text-cyber" /></div>}
+                    
                     {isEditing ? (
-                       formData.avatar_url ? <img src={formData.avatar_url} className="w-full h-full object-cover opacity-50" /> : <div className="w-full h-full bg-slate-800" />
+                       formData.avatar_url ? <img src={formData.avatar_url} className="w-full h-full object-cover opacity-50" /> : <div className="w-full h-full bg-void-800" />
                     ) : (
-                       profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-slate-700">{profile?.username?.[0]}</div>
+                       profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl font-mech font-bold text-void-700">{profile?.username?.[0]}</div>
                     )}
+                    
+                    {/* Scan Line Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyber/10 to-transparent h-full w-full animate-[scan_2s_infinite_linear] pointer-events-none opacity-50" />
                 </div>
              </div>
+             
              {isEditing && (
                <>
-                 <label htmlFor="pfp-upload" className="absolute inset-0 flex items-center justify-center cursor-pointer z-10 text-white font-bold opacity-0 hover:opacity-100 transition duration-300">
-                   <div className="bg-black/50 p-2 rounded-full backdrop-blur-sm"><Camera size={20} /></div>
+                 <label htmlFor="pfp-upload" className="absolute -bottom-3 -right-3 p-2 bg-cyber text-black clip-chamfer cursor-pointer hover:bg-white transition shadow-neon-cyan">
+                   <Camera size={16} />
                  </label>
                  <input id="pfp-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
                </>
              )}
           </div>
 
-          {/* Info Area */}
-          <div className="flex-1 text-center md:text-left w-full">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+          {/* Data Module */}
+          <div className="flex-1 w-full">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
               
-              {/* Name & Stats */}
               <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Cpu size={16} className="text-cyber" />
+                  <span className="text-[10px] font-code text-cyber uppercase tracking-widest">Operator Identity</span>
+                </div>
+                
                 {isEditing ? (
                   <input 
                     value={formData.username}
                     onChange={e => setFormData({...formData, username: e.target.value})}
-                    className="bg-slate-800/50 border border-slate-600 rounded-lg px-3 py-1.5 text-xl font-bold text-white focus:border-indigo-500 outline-none w-full md:w-auto mb-2"
-                    placeholder="Username"
+                    className="bg-void-950 border border-void-700 text-2xl font-mech font-bold text-white focus:border-cyber outline-none w-full md:w-auto p-2 clip-chamfer uppercase"
+                    placeholder="CALLSIGN..."
                   />
                 ) : (
-                  <h1 className="text-3xl font-black text-white tracking-tight mb-1">{profile?.username || "Gamer"}</h1>
+                  <h1 className="text-4xl font-mech font-bold text-white uppercase tracking-wide mb-2">{profile?.username || "UNKNOWN_USER"}</h1>
                 )}
                 
-                <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-medium text-slate-400">
-                   <span><strong className="text-white">{myPosts.length}</strong> Posts</span>
-                   <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                   <span><strong className="text-white">{myListings.length}</strong> In Vault</span>
+                <div className="flex gap-4 text-xs font-code text-slate-500 mt-2">
+                   <div className="flex items-center gap-2 px-2 py-1 bg-void-800 border border-white/5 clip-chamfer">
+                      <span className="text-white font-bold">{myPosts.length}</span> LOGS
+                   </div>
+                   <div className="flex items-center gap-2 px-2 py-1 bg-void-800 border border-white/5 clip-chamfer">
+                      <span className="text-white font-bold">{myListings.length}</span> ASSETS
+                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Control Panel */}
               <div className="flex gap-2">
                 {isEditing ? (
                   <>
-                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-lg bg-slate-800 font-bold text-xs hover:bg-slate-700 transition">Cancel</button>
-                    <button onClick={handleUpdateProfile} disabled={loading} className="px-4 py-2 rounded-lg bg-indigo-600 font-bold text-xs hover:bg-indigo-500 transition flex items-center gap-2 shadow-lg shadow-indigo-600/20">
-                      {loading && <Loader2 size={14} className="animate-spin"/>} Save
+                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-void-800 border border-white/10 text-slate-400 font-code text-xs hover:text-white hover:border-white transition clip-chamfer">CANCEL</button>
+                    <button onClick={handleUpdateProfile} disabled={loading} className="px-4 py-2 bg-cyber text-black font-mech font-bold text-xs hover:bg-white transition flex items-center gap-2 clip-chamfer">
+                      {loading && <Loader2 size={14} className="animate-spin"/>} SAVE_CHANGES
                     </button>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => setIsEditing(true)} className="p-2.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white transition group" title="Edit Profile">
-                      <Settings size={18} className="group-hover:rotate-90 transition duration-500" />
+                    <button onClick={() => setIsEditing(true)} className="p-3 bg-void-800 border border-white/10 text-cyber hover:bg-cyber hover:text-black transition clip-chamfer" title="Update Registry">
+                      <Settings size={18} />
                     </button>
-                    <button onClick={handleLogout} className="p-2.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-red-500 hover:text-white transition" title="Logout">
+                    <button onClick={handleLogout} className="p-3 bg-void-800 border border-white/10 text-flux hover:bg-flux hover:text-black transition clip-chamfer" title="Terminate Session">
                       <LogOut size={18} />
                     </button>
                   </>
@@ -168,62 +173,56 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
               </div>
             </div>
 
-            {/* Bio / Contact Details */}
-            <div className="space-y-3 max-w-lg mx-auto md:mx-0 text-sm">
-               <div className="inline-flex items-center gap-2 text-slate-400 bg-slate-900/50 px-3 py-1 rounded-md border border-white/5">
-                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> {session.user.email}
-               </div>
-               
+            {/* Bio / Meta Data */}
+            <div className="space-y-4 max-w-2xl text-sm border-t border-white/5 pt-4">
                {isEditing ? (
-                 <div className="grid grid-cols-1 gap-3 mt-2">
-                   <div className="grid grid-cols-2 gap-2">
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 text-slate-500" size={14}/>
+                 <div className="grid grid-cols-1 gap-4">
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="relative group">
+                        <MapPin className="absolute left-3 top-3 text-slate-500 group-focus-within:text-cyber" size={14}/>
                         <input 
                           value={formData.location} 
                           onChange={e => setFormData({...formData, location: e.target.value})}
-                          placeholder="Location"
-                          className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
+                          placeholder="SECTOR / LOCATION"
+                          className="w-full bg-void-950 border border-void-700 pl-9 pr-3 py-2.5 text-white font-code text-xs focus:border-cyber outline-none clip-chamfer"
                         />
                       </div>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-2.5 text-slate-500" size={14}/>
+                      <div className="relative group">
+                        <Phone className="absolute left-3 top-3 text-slate-500 group-focus-within:text-cyber" size={14}/>
                         <input 
                           value={formData.phone_number} 
                           onChange={e => setFormData({...formData, phone_number: e.target.value})}
-                          placeholder="Phone Number"
-                          className="w-full bg-slate-800/50 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-white focus:border-indigo-500 outline-none"
+                          placeholder="COMM_FREQUENCY"
+                          className="w-full bg-void-950 border border-void-700 pl-9 pr-3 py-2.5 text-white font-code text-xs focus:border-cyber outline-none clip-chamfer"
                         />
                       </div>
                    </div>
-                   
-                   {/* Bio Textarea */}
                    <textarea
                       value={formData.bio}
                       onChange={e => setFormData({...formData, bio: e.target.value})}
-                      placeholder="Your bio... (e.g. Steam ID, Twitch, favorite quotes)"
-                      className="w-full bg-slate-800/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:border-indigo-500 outline-none resize-none h-20 text-sm"
+                      placeholder="OPERATOR_BIO_DATA..."
+                      className="w-full bg-void-950 border border-void-700 px-3 py-2 text-white font-code text-xs focus:border-cyber outline-none resize-none h-24 clip-chamfer"
                    />
                  </div>
                ) : (
-                 <div className="space-y-3 mt-1">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                        {profile?.location && (
-                          <p className="text-indigo-300 font-medium flex items-center gap-1.5">
-                            <MapPin size={14} /> {profile.location}
-                          </p>
-                        )}
+                 <div className="space-y-4">
+                    <div className="flex flex-wrap gap-4">
+                        <div className="text-slate-400 font-code text-xs flex items-center gap-2">
+                          <MapPin size={12} className="text-cyber" /> {profile?.location || "UNKNOWN_SECTOR"}
+                        </div>
                         {profile?.phone_number && (
-                          <p className="text-slate-400 font-medium flex items-center gap-1.5">
-                            <Phone size={14} /> {profile.phone_number}
-                          </p>
+                          <div className="text-slate-400 font-code text-xs flex items-center gap-2">
+                            <Phone size={12} className="text-cyber" /> {profile.phone_number}
+                          </div>
                         )}
+                        <div className="text-slate-500 font-code text-xs flex items-center gap-2">
+                           <Shield size={12} /> LEVEL 1 OPERATOR
+                        </div>
                     </div>
                     
-                    {/* Display Bio */}
                     {profile?.bio && (
-                      <div className="flex gap-2 text-slate-400 italic bg-white/5 p-3 rounded-lg border border-white/5">
-                        <p className="leading-relaxed">{profile.bio}</p>
+                      <div className="bg-void-950/50 p-3 border-l-2 border-cyber text-slate-300 font-ui text-sm leading-relaxed">
+                        "{profile.bio}"
                       </div>
                     )}
                  </div>
@@ -233,21 +232,23 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
         </div>
       </div>
 
-      {/* --- 2. TABS --- */}
-      <div className="flex justify-center mb-8">
-        <div className="bg-slate-900/80 backdrop-blur-md p-1 rounded-xl border border-white/10 flex gap-1">
-          <button 
-            onClick={() => setActiveTab('posts')}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${activeTab === 'posts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-          >
-            <Grid size={14} /> Posts
-          </button>
-          <button 
-            onClick={() => setActiveTab('listings')}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${activeTab === 'listings' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-          >
-            <Archive size={14} /> My Vault
-          </button>
+      {/* --- 2. DATA TABS --- */}
+      <div className="flex justify-center mb-10">
+        <div className="bg-void-800 border border-white/10 p-1 clip-chamfer flex gap-1">
+          {['posts', 'listings'].map(tab => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex items-center gap-2 px-6 py-2 font-mech font-bold uppercase tracking-wider text-xs transition-all clip-chamfer ${
+                activeTab === tab 
+                  ? 'bg-cyber text-black' 
+                  : 'text-slate-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {tab === 'posts' ? <Grid size={14} /> : <Archive size={14} />} 
+              {tab === 'posts' ? 'Mission Logs' : 'Vault Assets'}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -255,32 +256,30 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
       
       {/* POSTS TAB */}
       {activeTab === 'posts' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {myPosts.length === 0 ? (
-            <div className="col-span-full py-24 text-center">
-              <div className="bg-slate-900/50 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 border border-slate-800">
-                <Camera className="text-slate-600" size={24}/>
-              </div>
-              <p className="text-slate-500 text-sm">No moments shared yet.</p>
+            <div className="col-span-full py-20 text-center border border-dashed border-void-700 bg-void-900/30 clip-chamfer">
+              <Camera className="text-void-700 mx-auto mb-4" size={32}/>
+              <p className="text-void-500 font-code text-xs">NO LOGS RECORDED</p>
             </div>
           ) : (
             myPosts.map(post => (
               <div 
                 key={post.id} 
                 onClick={() => navigate(`/community/post/${post.id}`)}
-                className="group relative aspect-square bg-slate-900 rounded-2xl overflow-hidden border border-white/5 cursor-pointer hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10 transition duration-300"
+                className="group relative aspect-square bg-void-800 clip-chamfer border border-white/5 cursor-pointer hover:border-cyber/50 transition duration-300"
               >
                 {post.image_url ? (
-                  <img src={post.image_url} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                  <img src={post.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-500" />
                 ) : (
-                  <div className="w-full h-full p-8 flex items-center justify-center bg-slate-800/50 text-center">
-                    <p className="text-slate-400 font-medium line-clamp-4 italic">"{post.content}"</p>
+                  <div className="w-full h-full p-6 flex items-center justify-center bg-void-900 text-center">
+                    <p className="text-slate-500 font-code text-xs italic line-clamp-4">"{post.content}"</p>
                   </div>
                 )}
                 
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition duration-300 backdrop-blur-sm">
-                   <div className="flex items-center gap-2 font-bold text-white text-lg">
-                     <Heart className="fill-white" size={24} /> {post.likes_count || 0}
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover:translate-y-0 transition duration-300">
+                   <div className="flex items-center gap-2 font-bold font-code text-cyber text-sm">
+                     <Heart className="fill-cyber" size={14} /> {post.likes_count || 0}
                    </div>
                 </div>
               </div>
@@ -289,55 +288,37 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
         </div>
       )}
 
-      {/* VAULT TAB (Listings) */}
+      {/* VAULT TAB */}
       {activeTab === 'listings' && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
            {myListings.length === 0 ? (
-            <div className="col-span-full py-24 text-center">
-              <div className="bg-slate-900/50 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 border border-slate-800">
-                <Archive className="text-slate-600" size={24}/>
-              </div>
-              <p className="text-slate-500 text-sm">Your vault is empty.</p>
+            <div className="col-span-full py-20 text-center border border-dashed border-void-700 bg-void-900/30 clip-chamfer">
+              <Archive className="text-void-700 mx-auto mb-4" size={32}/>
+              <p className="text-void-500 font-code text-xs">VAULT EMPTY</p>
             </div>
           ) : (
             myListings.map(game => (
               <div 
                 key={game.id} 
                 onClick={() => setSelectedGame(game)} 
-                className="group relative bg-slate-900 rounded-2xl overflow-hidden border border-white/5 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 transition duration-300"
+                className="group relative bg-void-800 clip-chamfer border border-white/5 cursor-pointer hover:border-cyber/50 transition duration-300"
               >
-                {/* Image Aspect Ratio Container */}
-                <div className="aspect-[3/4] relative overflow-hidden bg-slate-950">
+                <div className="aspect-[3/4] relative overflow-hidden bg-void-950 border-b border-white/5">
                   {game.cover_url ? (
-                    <img src={game.cover_url} className="w-full h-full object-cover group-hover:scale-110 transition duration-500 opacity-90 group-hover:opacity-100" />
+                    <img src={game.cover_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-700"><Gamepad2 size={40} /></div>
+                    <div className="w-full h-full flex items-center justify-center text-void-700"><Gamepad2 size={40} /></div>
                   )}
-                  
-                  {/* Status Badge */}
-                  <div className="absolute top-2 right-2">
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${
-                      game.listing_type === 'Sale' ? 'bg-emerald-500/80 text-white border-emerald-400/30' :
-                      game.listing_type === 'Rent' ? 'bg-indigo-500/80 text-white border-indigo-400/30' :
-                      game.listing_type === 'Library' ? 'bg-slate-800/80 text-slate-300 border-slate-600/30' :
-                      'bg-orange-500/80 text-white border-orange-400/30'
-                    }`}>
-                      {game.listing_type}
-                    </span>
+                  <div className="absolute top-2 right-0 bg-cyber text-black text-[9px] font-bold font-code px-2 py-0.5 clip-chamfer">
+                    {game.listing_type.toUpperCase()}
                   </div>
                 </div>
 
-                {/* Footer Info */}
-                <div className="p-3 bg-slate-900 border-t border-white/5">
-                  <h3 className="text-m font-bold text-white truncate mb-1">{game.title}</h3>
-                  <div className="flex justify-between items-center text-s">
+                <div className="p-3">
+                  <h3 className="text-sm font-mech font-bold text-white truncate mb-1 group-hover:text-cyber transition">{game.title}</h3>
+                  <div className="flex justify-between items-center text-xs font-code">
                      <span className="text-slate-500">{game.platform}</span>
-                     {game.price > 0 && (
-                       <span className="text-indigo-400 font-bold">
-                         ${game.price}
-                         {game.listing_type === 'Rent' && <span className="text-[12px] text-slate-500 font-normal ml-0.5">/wk</span>}
-                       </span>
-                     )}
+                     {game.price > 0 && <span className="text-cyber font-bold">${game.price}</span>}
                   </div>
                 </div>
               </div>
@@ -346,44 +327,45 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
         </div>
       )}
 
-      {/* --- GAME DETAILS MODAL --- */}
+      {/* --- DETAILS MODAL --- */}
       {selectedGame && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 w-full max-w-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-void-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-void-800 w-full max-w-2xl clip-chamfer border border-white/10 shadow-2xl relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
             
-            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-slate-800 rounded-full text-white transition"><X size={20} /></button>
+            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white"><X size={20} /></button>
 
-            <div className="w-full md:w-1/2 h-64 md:h-auto bg-black relative">
+            <div className="w-full md:w-1/2 relative bg-black min-h-[250px]">
               {selectedGame.cover_url ? (
-                <img src={selectedGame.cover_url} className="w-full h-full object-cover opacity-80" />
+                 <img src={selectedGame.cover_url} className="w-full h-full object-cover opacity-80" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-700"><Gamepad2 size={64} /></div>
+                 <div className="w-full h-full flex items-center justify-center text-void-700"><Gamepad2 size={64} /></div>
               )}
+              <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none" />
             </div>
 
-            <div className="w-full md:w-1/2 p-8 flex flex-col bg-slate-900">
+            <div className="w-full md:w-1/2 p-8 flex flex-col bg-void-800 border-l border-white/5">
               <div className="mb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">{selectedGame.listing_type}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">{selectedGame.platform}</span>
+                <div className="flex gap-2 mb-2">
+                  <span className="text-cyber border border-cyber px-2 py-0.5 text-[10px] font-bold font-code">{selectedGame.listing_type.toUpperCase()}</span>
+                  <span className="text-slate-400 border border-slate-600 px-2 py-0.5 text-[10px] font-bold font-code">{selectedGame.platform}</span>
                 </div>
-                <h2 className="text-2xl font-bold text-white leading-tight mb-2">{selectedGame.title}</h2>
+                <h2 className="text-3xl font-mech font-bold text-white uppercase mb-2 leading-none">{selectedGame.title}</h2>
                 {selectedGame.price > 0 && (
-                  <p className="text-2xl font-bold text-indigo-400">
+                  <p className="text-2xl font-code font-bold text-cyber">
                     ${selectedGame.price}
-                    {selectedGame.listing_type === 'Rent' && <span className="text-sm text-slate-500 font-medium ml-1">/week</span>}
+                    {selectedGame.listing_type === 'Rent' && <span className="text-sm text-slate-500 font-normal ml-1">/WK</span>}
                   </p>
                 )}
               </div>
 
-              <div className="mt-auto bg-slate-950/50 rounded-xl p-4 border border-white/5">
+              <div className="mt-auto bg-void-900/50 p-4 border border-white/5 clip-chamfer">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
-                    {profile?.avatar_url ? <img src={profile.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-white bg-indigo-600">{profile?.username?.[0]}</div>}
+                  <div className="w-10 h-10 bg-void-700 border border-white/10 clip-chamfer flex items-center justify-center text-white font-mech font-bold">
+                    {profile?.username?.[0]}
                   </div>
                   <div>
-                    <p className="font-bold text-white text-sm">Stored in Vault</p>
-                    <p className="text-xs text-slate-500">Owned by You</p>
+                    <p className="font-mech font-bold text-white text-sm">VAULT ASSET</p>
+                    <p className="text-xs font-code text-emerald-500">OWNERSHIP_VERIFIED</p>
                   </div>
                 </div>
               </div>
@@ -391,7 +373,6 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
