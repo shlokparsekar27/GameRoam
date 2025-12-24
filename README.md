@@ -2,6 +2,8 @@
 
 A modern web application designed to help gamers track, manage, rent, and sell their physical game collections. GameRoam provides a centralized "Vault" for your library and a Marketplace to connect with other local gamers for trades and rentals.
 
+### 🚀 [View Live Demo](https://gameroam.vercel.app)
+
 ---
 
 ## Features
@@ -24,18 +26,18 @@ GameRoam is a comprehensive Single-Page Application (SPA) built for the gaming c
 This project is built with a modern, powerful, and scalable tech stack.
 
 * **Frontend:**
-    * [**React**](https://reactjs.org/) (Vite)
-    * [**Tailwind CSS**](https://tailwindcss.com/) for professional and responsive styling
-    * [**Lucide React**](https://lucide.dev/) for beautiful icons
-    * [**React Router**](https://reactrouter.com/) for client-side routing
+  * [**React**](https://reactjs.org/) (Vite)
+  * [**Tailwind CSS**](https://tailwindcss.com/) for professional and responsive styling
+  * [**Lucide React**](https://lucide.dev/) for beautiful icons
+  * [**React Router**](https://reactrouter.com/) for client-side routing
 * **Backend (BaaS):**
-    * [**Supabase**](https://supabase.io/) for the database, authentication, storage, and real-time features.
-        * **Database:** PostgreSQL
-        * **Authentication:** Supabase Auth
-        * **Storage:** Supabase Storage for user avatars and chat media
-        * **Realtime:** Supabase Realtime for live chat messages
+  * [**Supabase**](https://supabase.io/) for the database, authentication, storage, and real-time features.
+    * **Database:** PostgreSQL
+    * **Authentication:** Supabase Auth
+    * **Storage:** Supabase Storage for user avatars and chat media
+    * **Realtime:** Supabase Realtime for live chat messages
 * **External APIs:**
-    * [**RAWG Video Games API**](https://rawg.io/apidocs) for fetching game metadata and cover art.
+  * [**RAWG Video Games API**](https://rawg.io/apidocs) for fetching game metadata and cover art.
 
 ---
 
@@ -84,18 +86,32 @@ The application should now be running on `http://localhost:5173/`.
 
 ---
 
+## Deployment
+
+This project is configured for seamless deployment on **Vercel**.
+
+1.  **Push to GitHub:** Ensure your project is pushed to a public or private GitHub repository.
+2.  **Import to Vercel:** Log in to Vercel and import your project repository.
+3.  **Environment Variables:** In the Vercel dashboard, go to **Settings > Environment Variables** and add the following:
+    * `VITE_SUPABASE_URL`
+    * `VITE_SUPABASE_ANON_KEY`
+    * `VITE_RAWG_API_KEY`
+4.  **Deploy:** Click **Deploy**. Vercel will automatically detect the Vite settings and build your application.
+
+---
+
 ## Supabase Project Setup
 
 This project requires a Supabase backend to be set up. You will need to create the following tables and buckets:
 
 * **Tables:**
-    * `profiles` (extends `auth.users`) - Stores user details like username, avatar, and location.
-    * `games` - Stores game data, price, status, and owner_id.
-    * `messages` - Stores chat history and media links.
-    * `community_posts` - Stores user social posts and likes.
+  * `profiles` (extends `auth.users`) - Stores user details like username, avatar, and location.
+  * `games` - Stores game data, price, status, and owner_id.
+  * `messages` - Stores chat history and media links.
+  * `community_posts` - Stores user social posts and likes.
 * **Storage Buckets:**
-    * `avatars` (public) - For user profile pictures.
-    * `chat-uploads` (authenticated) - For sharing images/videos in chat.
+  * `avatars` (public) - For user profile pictures.
+  * `chat-uploads` (authenticated) - For sharing images/videos in chat.
 
 *Note: Ensure Row Level Security (RLS) policies are enabled to protect user data.*
 
