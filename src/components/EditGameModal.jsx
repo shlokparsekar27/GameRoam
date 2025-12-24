@@ -138,11 +138,11 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                     value={formData.platform}
                     onChange={e => setFormData({ ...formData, platform: e.target.value })}
                   >
-                    <option value="PC">PC_TERM</option>
-                    <option value="PS5">PS5_CORE</option>
-                    <option value="PS4">PS4_LEGACY</option>
-                    <option value="Xbox">XBOX_SERIES</option>
-                    <option value="Switch">NINTENDO_SW</option>
+                    <option value="PC">PC</option>
+                    <option value="PS5">PS5</option>
+                    <option value="PS4">PS4</option>
+                    <option value="Xbox">XBOX</option>
+                    <option value="Switch">NINTENDO</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
                 </div>
@@ -155,12 +155,12 @@ export default function EditGameModal({ game, onClose, onGameUpdated }) {
                     value={formData.listing_type}
                     onChange={e => setFormData({ ...formData, listing_type: e.target.value })}
                   >
-                    <option value="Library">VAULT_STORE</option>
-                    <option value="Rent">RENT_PROTOCOL</option>
-                    <option value="Sale">SALE_PROTOCOL</option>
-                    <option value="Rented Out">STATUS_AWAY</option>
-                    <option value="Rented In">STATUS_BORROWED</option>
-                    <option value="Sold">STATUS_SOLD</option>
+                    <option value="Library">VAULT</option>
+                    <option value="Rent">RENT</option>
+                    <option value="Sale">SALE</option>
+                    <option value="Rented Out">AWAY</option>
+                    <option value="Rented In">LENT_OUT</option>
+                    <option value="Sold">SOLD</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-cyber text-[10px]">▼</div>
                 </div>

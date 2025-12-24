@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import {
   Plus, Gamepad2, Pencil, Trash2, CheckCircle,
-  Archive, DollarSign, Activity, LayoutGrid, X, Cpu, Search
+  Archive, DollarSign, Activity, LayoutGrid, X, Cpu, Search,
+  ArrowRightLeft, UserMinus, UserPlus, History
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -75,11 +76,26 @@ export default function Dashboard({ session }) {
     return matchesFilter && matchesSearch;
   });
 
+  // --- UPDATED STATS CALCULATION ---
   const stats = {
     total: games.length,
-    sale: games.filter(g => g.listing_type === 'Sale').length,
-    rent: games.filter(g => g.listing_type === 'Rent').length,
-    library: games.filter(g => g.listing_type === 'Library').length
+    library: games.filter(g => g.listing_type === 'Library').length,
+    rentedIn: games.filter(g => g.listing_type === 'Rented In').length,
+    rentedOut: games.filter(g => g.listing_type === 'Rented Out').length,
+    activeListings: games.filter(g => ['Sale', 'Rent'].includes(g.listing_type)).length,
+    sold: games.filter(g => g.listing_type === 'Sold').length
+  };
+
+  // --- HELPER: GET LABEL FOR FILTER ---
+  const getFilterLabel = (f) => {
+    switch (f) {
+      case 'Library': return 'Vault';
+      case 'Rented In': return 'Borrowed';
+      case 'Rented Out': return 'Lent Out';
+      case 'Rent': return 'For Rent';
+      case 'Sale': return 'For Sale';
+      default: return f;
+    }
   };
 
   return (
@@ -114,13 +130,15 @@ export default function Dashboard({ session }) {
               </button>
             </div>
 
-            {/* STATS HUD MODULES */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {/* UPDATED STATS GRID (3 Columns for better fit) */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
               {[
                 { label: 'Total Assets', value: stats.total, color: 'text-white', icon: Cpu },
-                { label: 'For Rent', value: stats.rent, color: 'text-cyber', icon: Activity },
-                { label: 'For Sale', value: stats.sale, color: 'text-emerald-400', icon: DollarSign },
-                { label: 'Archived', value: stats.library, color: 'text-slate-400', icon: Archive },
+                { label: 'Vault Core', value: stats.library, color: 'text-slate-300', icon: Archive },
+                { label: 'Borrowed', value: stats.rentedIn, color: 'text-purple-400', icon: UserPlus },
+                { label: 'Lent Out', value: stats.rentedOut, color: 'text-amber-400', icon: UserMinus },
+                { label: 'Marketplace', value: stats.activeListings, color: 'text-cyber', icon: Activity },
+                { label: 'History (Sold)', value: stats.sold, color: 'text-slate-500', icon: History },
               ].map((stat, idx) => (
                 <div key={idx} className="bg-void-950/50 border border-white/5 p-4 relative group hover:border-white/20 transition-colors">
                   <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/20" />
@@ -158,10 +176,10 @@ export default function Dashboard({ session }) {
               />
             </div>
 
-            {/* FILTERS */}
+            {/* UPDATED FILTER LIST */}
             <div className="overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
               <div className="flex md:flex-wrap gap-2 min-w-max">
-                {['All', 'Library', 'Rent', 'Sale'].map((f) => (
+                {['All', 'Library', 'Rented In', 'Rented Out', 'Rent', 'Sale', 'Sold'].map((f) => (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
@@ -170,7 +188,7 @@ export default function Dashboard({ session }) {
                       : 'bg-transparent border-transparent text-slate-500 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    {f === 'Library' ? 'Vault' : f}
+                    {getFilterLabel(f)}
                   </button>
                 ))}
               </div>
@@ -215,7 +233,7 @@ export default function Dashboard({ session }) {
                         <img
                           src={game.cover_url}
                           alt={game.title}
-                          className="w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:contrast-125"
+                          className={`w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:contrast-125 ${game.listing_type === 'Sold' ? 'grayscale opacity-50' : ''}`}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-void-900 text-void-700">
@@ -226,41 +244,31 @@ export default function Dashboard({ session }) {
                       {/* Cyber Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-void-900 via-transparent to-transparent opacity-80" />
 
-                      {/* Price Tag / Badge */}
+                      {/* UPDATED BADGE SYSTEM */}
                       <div className="absolute top-0 right-0 p-2">
                         <span className={`px-2 py-1 text-[10px] font-code font-bold border backdrop-blur-md ${game.listing_type === 'Sale' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' :
-                          game.listing_type === 'Rent' ? 'bg-cyber/10 border-cyber text-cyber' :
-                            'bg-slate-800/80 border-slate-600 text-slate-300'
+                            game.listing_type === 'Rent' ? 'bg-cyber/10 border-cyber text-cyber' :
+                              game.listing_type === 'Rented In' ? 'bg-purple-500/10 border-purple-500 text-purple-400' :
+                                game.listing_type === 'Rented Out' ? 'bg-amber-500/10 border-amber-500 text-amber-400' :
+                                  game.listing_type === 'Sold' ? 'bg-slate-800/80 border-slate-600 text-slate-500 line-through' :
+                                    'bg-slate-800/80 border-slate-600 text-slate-300'
                           }`}>
-                          {game.listing_type === 'Library' ? 'VAULT' : game.listing_type.toUpperCase()}
+                          {getFilterLabel(game.listing_type).toUpperCase()}
                         </span>
-                      </div>
-
-                      {/* Hover Controls (Desktop) - Kept for consistency, but functionality also in Modal now */}
-                      <div className="absolute inset-0 hidden md:flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-void-900/80 backdrop-blur-sm">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setEditingGame(game); }}
-                          className="p-3 bg-white text-black rounded-none hover:bg-cyber hover:text-black transition clip-chamfer"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(game.id); }}
-                          className="p-3 bg-flux text-black rounded-none hover:bg-red-600 hover:text-white transition clip-chamfer"
-                        >
-                          <Trash2 size={16} />
-                        </button>
                       </div>
                     </div>
 
                     {/* Footer Info */}
                     <div className="p-4 border-t border-white/5">
-                      <h3 className="font-mech font-bold text-white text-lg truncate mb-1 leading-none">{game.title}</h3>
+                      <h3 className={`font-mech font-bold text-white text-lg truncate mb-1 leading-none ${game.listing_type === 'Sold' ? 'text-slate-500' : ''}`}>
+                        {game.title}
+                      </h3>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-code text-slate-500 bg-white/5 px-1.5 py-0.5 rounded">{game.platform}</span>
                         <div className="font-code font-bold text-xs">
                           {game.listing_type === 'Sale' && <span className="text-emerald-400">${game.price}</span>}
                           {game.listing_type === 'Rent' && <span className="text-cyber">${game.price}/wk</span>}
+                          {game.listing_type === 'Sold' && <span className="text-slate-600">SOLD</span>}
                         </div>
                       </div>
                     </div>
@@ -307,7 +315,7 @@ export default function Dashboard({ session }) {
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-2 py-0.5 text-[10px] font-bold font-code uppercase text-cyber border border-cyber bg-cyber/10">
-                    {selectedGame.listing_type}
+                    {getFilterLabel(selectedGame.listing_type)}
                   </span>
                   <span className="px-2 py-0.5 text-[10px] font-bold font-code uppercase text-slate-400 border border-slate-600">
                     {selectedGame.platform}
@@ -316,14 +324,22 @@ export default function Dashboard({ session }) {
 
                 <h2 className="text-4xl font-mech font-bold text-white mb-2 uppercase">{selectedGame.title}</h2>
 
-                {selectedGame.price > 0 && (
+                {/* Price Display Logic */}
+                {selectedGame.price > 0 && ['Rent', 'Sale'].includes(selectedGame.listing_type) && (
                   <p className="text-3xl font-code font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyber to-blue-500 mb-6">
                     ${selectedGame.price}
                     {selectedGame.listing_type === 'Rent' && <span className="text-sm text-slate-500 ml-1">/WEEK</span>}
                   </p>
                 )}
 
-                {/* MANAGEMENT CONSOLE (Edit/Delete) - VISIBLE ON MOBILE & DESKTOP */}
+                {/* Date Displays for Borrowed/Lent */}
+                {(selectedGame.listing_type === 'Rented In' || selectedGame.listing_type === 'Rented Out') && selectedGame.return_date && (
+                  <p className="text-xl font-code font-bold text-amber-500 mb-6 flex items-center gap-2">
+                    <History size={20} /> Due: {selectedGame.return_date}
+                  </p>
+                )}
+
+                {/* MANAGEMENT CONSOLE */}
                 <div className="mt-8 pt-8 border-t border-dashed border-white/10">
                   <div className="bg-void-900/50 p-4 border border-white/5">
                     <p className="text-[10px] font-mech uppercase tracking-widest text-slate-500 mb-3 flex items-center gap-2">
