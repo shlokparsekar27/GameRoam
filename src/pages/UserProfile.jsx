@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { createPortal } from 'react-dom';
 import {
   MapPin, Calendar, Loader2, Grid, Archive, Heart, MessageCircle, Phone, Gamepad2, X, Shield, Radio
 } from 'lucide-react';
@@ -41,7 +42,7 @@ export default function UserProfile({ session }) {
   if (!profile) return <div className="text-center text-cyber font-code py-40">TARGET_NOT_FOUND</div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-48 pt-28 animate-in fade-in duration-700">
+    <div className="max-w-5xl mx-auto px-4 pb-40 animate-in fade-in duration-700">
 
       {/* --- 1. TARGET DOSSIER HEADER --- */}
       <div className="bg-void-800 border border-white/5 clip-chamfer p-1 mb-10 relative">
@@ -50,8 +51,8 @@ export default function UserProfile({ session }) {
         <div className="relative z-10 bg-void-900 clip-chamfer p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start">
 
           {/* Avatar */}
-          <div className="relative shrink-0 mx-auto md:mx-0">
-            <div className="w-32 h-32 md:w-40 md:h-40 clip-chamfer bg-void-800 border border-white/10 p-1 relative group">
+          <div className="relative shrink-0">
+            <div className="w-24 h-24 md:w-40 md:h-40 clip-chamfer bg-void-800 border border-white/10 p-1 relative group">
               {/* Decorative scanning line */}
               <div className="absolute inset-0 bg-cyber/5 animate-pulse z-10 pointer-events-none" />
               <div className="w-full h-full bg-void-950 clip-chamfer overflow-hidden flex items-center justify-center relative z-0">
@@ -65,17 +66,17 @@ export default function UserProfile({ session }) {
           </div>
 
           {/* Info */}
-          <div className="flex-1 w-full text-center md:text-left">
+          <div className="flex-1 w-full text-left">
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
 
               <div className="flex-1">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                <div className="flex items-center justify-start gap-2 mb-2">
                   <Shield size={14} className="text-slate-500" />
                   <span className="text-[10px] font-code text-slate-500 uppercase tracking-widest">Public Dossier</span>
                 </div>
                 <h1 className="text-4xl font-mech font-bold text-white uppercase tracking-wide mb-2">{profile.username}</h1>
 
-                <div className="flex items-center justify-center md:justify-start gap-4 text-xs font-code text-slate-500 mt-2">
+                <div className="flex items-center justify-start gap-4 text-xs font-code text-slate-500 mt-2">
                   <span className="text-white font-bold">{userPosts.length}</span> LOGS
                   <span className="text-void-700">|</span>
                   <span className="text-white font-bold">{userListings.length}</span> ASSETS
@@ -85,15 +86,15 @@ export default function UserProfile({ session }) {
               {!isMe && (
                 <button
                   onClick={() => navigate(`/chat/${userId}`)}
-                  className="px-6 py-3 bg-cyber hover:bg-white text-black font-mech font-bold text-xs uppercase tracking-widest transition flex items-center gap-2 clip-chamfer shadow-neon-cyan mx-auto md:mx-0"
+                  className="px-6 py-3 bg-cyber hover:bg-white text-black font-mech font-bold text-xs uppercase tracking-widest transition flex items-center gap-2 clip-chamfer shadow-neon-cyan"
                 >
-                  <MessageCircle size={16} /> INITIATE_UPLINK
+                  <MessageCircle size={16} /> INITIATE_CHAT
                 </button>
               )}
             </div>
 
-            <div className="space-y-4 max-w-2xl text-sm border-t border-white/5 pt-4 mx-auto md:mx-0">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 font-code text-xs text-slate-400">
+            <div className="space-y-4 max-w-2xl text-sm border-t border-white/5 pt-4">
+              <div className="flex flex-wrap items-center justify-start gap-6 font-code text-xs text-slate-400">
                 {profile.location && (
                   <p className="flex items-center gap-2"><MapPin size={12} className="text-cyber" /> {profile.location}</p>
                 )}
@@ -123,8 +124,8 @@ export default function UserProfile({ session }) {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex items-center gap-2 px-6 py-2 font-mech font-bold uppercase tracking-wider text-xs transition-all clip-chamfer ${activeTab === tab
-                  ? 'bg-cyber text-black'
-                  : 'text-slate-500 hover:text-white hover:bg-white/5'
+                ? 'bg-cyber text-black'
+                : 'text-slate-500 hover:text-white hover:bg-white/5'
                 }`}
             >
               {tab === 'posts' ? <Grid size={14} /> : <Archive size={14} />}
@@ -137,7 +138,7 @@ export default function UserProfile({ session }) {
       {/* --- 3. GRID CONTENT --- */}
 
       {activeTab === 'posts' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
           {userPosts.length === 0 ? (
             <div className="col-span-full py-20 text-center border border-dashed border-void-700 bg-void-900/30 clip-chamfer">
               <p className="text-void-500 font-code text-xs">NO PUBLIC LOGS</p>
@@ -206,12 +207,12 @@ export default function UserProfile({ session }) {
       )}
 
       {/* --- MODAL --- */}
-      {selectedGame && (
+      {selectedGame && createPortal(
         <div className="fixed inset-0 bg-void-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-void-800 w-full max-w-2xl clip-chamfer border border-white/10 shadow-2xl relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white"><X size={20} /></button>
+            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white rounded-full"><X size={20} /></button>
 
-            <div className="w-full md:w-1/2 relative bg-black min-h-[250px]">
+            <div className="w-full md:w-1/2 relative bg-black h-56 md:h-auto md:min-h-[250px] shrink-0">
               {selectedGame.cover_url ? <img src={selectedGame.cover_url} className="w-full h-full object-cover opacity-80" /> : <div className="w-full h-full flex items-center justify-center text-void-700"><Gamepad2 size={64} /></div>}
             </div>
 
@@ -230,13 +231,14 @@ export default function UserProfile({ session }) {
                     onClick={() => navigate(`/chat/${userId}`)}
                     className="w-full bg-cyber hover:bg-white text-black font-mech font-bold py-3 flex items-center justify-center gap-2 transition clip-chamfer uppercase tracking-widest text-xs"
                   >
-                    <Radio size={16} /> Establish Connection
+                    <Radio size={16} /> INITIATE_CHAT
                   </button>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

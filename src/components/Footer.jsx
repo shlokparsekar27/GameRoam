@@ -4,14 +4,14 @@ import { FaDiscord, FaTwitch, FaSteam, FaYoutube, FaGithub, FaLinkedin } from 'r
 
 export default function Footer() {
     return (
-        <footer className="bg-void-950 border-t border-white/5 pt-16 pb-8 text-slate-400 text-sm mt-auto relative overflow-hidden">
+        <footer className="bg-void-950 border-t border-white/5 pt-16 pb-24 md:pb-8 text-slate-400 text-sm mt-auto relative overflow-hidden">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
 
                 {/* MAIN GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12 md:mb-16">
 
                     {/* COLUMN 1: BRAND & MISSION */}
                     <div className="space-y-4">
@@ -107,13 +107,13 @@ export default function Footer() {
                 </div>
 
                 {/* BOTTOM BAR / SYSTEM DIAGNOSTICS */}
-                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-6 text-center md:text-left">
 
                     {/* Copyright */}
-                    <p className="font-code text-xs text-slate-600">&copy; {new Date().getFullYear()} GAMEROAM_SYSTEMS. ALL RIGHTS RESERVED.</p>
+                    <p className="font-code text-xs text-slate-600 order-3 md:order-1">&copy; {new Date().getFullYear()} GAMEROAM_SYSTEMS.</p>
 
                     {/* Diagnostic Modules */}
-                    <div className="flex flex-wrap justify-center gap-4 text-[10px] uppercase font-code tracking-widest text-slate-500">
+                    <div className="flex flex-wrap justify-center gap-4 text-[10px] uppercase font-code tracking-widest text-slate-500 order-1 md:order-2">
                         <div className="flex items-center gap-2 px-3 py-1 bg-void-900 border border-white/5 clip-chamfer">
                             <Wifi size={10} className="text-emerald-500" /> LATENCY: 24ms
                         </div>
@@ -126,7 +126,7 @@ export default function Footer() {
                     </div>
 
                     {/* Legal Links */}
-                    <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider font-mech">
+                    <div className="flex gap-6 text-[10px] font-bold uppercase tracking-wider font-mech order-2 md:order-3">
                         <Link to="/privacy" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12} /> Security</Link>
                         <Link to="/terms" className="hover:text-cyber transition flex items-center gap-1"><Shield size={12} /> Protocol</Link>
                     </div>

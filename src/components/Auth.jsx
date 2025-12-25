@@ -93,7 +93,7 @@ export default function Auth() {
               <div className="relative group">
                 <Lock className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-cyber transition-colors" size={18} />
                 <input
-                  type="password" required placeholder="ACCESS_CODE" value={password} onChange={(e) => setPassword(e.target.value)}
+                  type="password" required placeholder="PASSWORD" value={password} onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-void-950 text-white font-code pl-12 pr-4 py-3 border border-void-700 focus:border-cyber outline-none transition-all placeholder:text-void-700 text-sm clip-chamfer"
                 />
               </div>
@@ -102,7 +102,7 @@ export default function Auth() {
                 <div className="relative group animate-in fade-in slide-in-from-top-2">
                   <User className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-cyber transition-colors" size={18} />
                   <input
-                    type="password" required placeholder="CONFIRM_CODE" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                    type="password" required placeholder="CONFIRM_PASSWORD" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full bg-void-950 text-white font-code pl-12 pr-4 py-3 border border-void-700 focus:border-cyber outline-none transition-all placeholder:text-void-700 text-sm clip-chamfer"
                   />
                 </div>
@@ -113,7 +113,7 @@ export default function Auth() {
                 disabled={loading}
                 className="w-full bg-cyber hover:bg-white text-black font-mech font-bold py-4 transition-all duration-200 shadow-neon-cyan flex items-center justify-center gap-2 mt-4 clip-chamfer uppercase tracking-widest text-sm"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : (isSignUp ? <><Fingerprint size={18} /> INITIALIZE_ID</> : <><Fingerprint size={18} /> AUTHENTICATE</>)}
+                {loading ? <Loader2 className="animate-spin" size={18} /> : (isSignUp ? <><Fingerprint size={18} /> SIGN_UP</> : <><Fingerprint size={18} /> SIGN_IN</>)}
               </button>
             </form>
 

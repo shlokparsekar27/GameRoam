@@ -3,22 +3,23 @@ import { Gamepad2, Users, ArrowRightLeft, Shield, Globe, Zap, Heart, ShoppingBag
 
 export default function About() {
   return (
-    <div className="max-w-7xl mx-auto space-y-24 py-12 pt-28 px-6 pb-40">
+    <div className="max-w-7xl mx-auto space-y-12 md:space-y-24 py-4 md:py-12 px-4 md:px-6">
 
       {/* 1. HERO */}
-      <div className="text-center relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyber/10 blur-[100px] rounded-full pointer-events-none" />
+      {/* 1. HERO */}
+      <div className="text-center relative pt-8 md:pt-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-cyber/10 blur-[80px] md:blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-1 mb-6 border border-cyber/30 bg-cyber/5 clip-chamfer">
+        <div className="inline-flex items-center gap-2 px-4 py-1 mb-4 md:mb-6 border border-cyber/30 bg-cyber/5 clip-chamfer">
           <Zap size={14} className="text-cyber" />
           <span className="text-[10px] font-code font-bold text-cyber uppercase tracking-[0.2em]">System Version 2.0</span>
         </div>
 
-        <h1 className="text-6xl md:text-8xl font-mech font-bold text-white mb-6 uppercase tracking-tighter leading-none">
+        <h1 className="text-4xl md:text-8xl font-mech font-bold text-white mb-4 md:mb-6 uppercase tracking-tighter leading-none">
           Game<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber to-purple-600">Roam</span>
         </h1>
 
-        <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto font-ui leading-relaxed">
+        <p className="text-sm md:text-2xl text-slate-400 max-w-3xl mx-auto font-ui leading-relaxed">
           The decentralized trading grid for operators, collectors, and gamers.
           <span className="text-white block mt-2">Secure. Local. Encrypted.</span>
         </p>
@@ -55,8 +56,8 @@ export default function About() {
 
       {/* 3. CORE PROTOCOLS */}
       <div className="grid md:grid-cols-2 gap-8 pt-10 border-t border-white/5">
-        <div className="bg-void-800 border border-white/5 clip-chamfer p-1">
-          <div className="bg-void-900 p-10 h-full clip-chamfer flex flex-col justify-center">
+        <div className="bg-void-800 border border-white/5 clip-chamfer p-1 h-full">
+          <div className="bg-void-900 p-8 md:p-10 h-full clip-chamfer flex flex-col justify-center">
             <h2 className="text-3xl font-mech font-bold text-white mb-6 uppercase">Primary Objective</h2>
             <p className="text-slate-300 text-lg leading-relaxed mb-6 font-ui">
               "To decentralize the gaming economy. Assets should not decay in isolation; they must be circulated to maintain value."
@@ -68,15 +69,15 @@ export default function About() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer">
+        <div className="space-y-4 h-full flex flex-col">
+          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-3">
               <ArrowRightLeft className="text-emerald-400" size={24} />
               <h3 className="text-white font-mech font-bold text-xl uppercase">Circular Economy</h3>
             </div>
             <p className="text-slate-400 text-sm">Recycle physical media. Reduce waste. Maximize utility.</p>
           </div>
-          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer">
+          <div className="bg-void-800 border border-white/5 p-8 clip-chamfer flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-3">
               <Shield className="text-cyber" size={24} />
               <h3 className="text-white font-mech font-bold text-xl uppercase">Trust Protocol</h3>

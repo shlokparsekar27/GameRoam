@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Search, MapPin, ShoppingBag, Gamepad2, Loader2, MessageCircle, X, SlidersHorizontal, Cpu, Crosshair, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Marketplace({ session }) {
@@ -213,7 +214,7 @@ export default function Marketplace({ session }) {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white text-xs font-bold truncate">@{game.owner?.username}</p>
+                      <p className="text-white text-xs font-bold truncate">{game.owner?.username}</p>
                       <p className="text-slate-500 text-[10px] font-code truncate flex items-center gap-1">
                         <MapPin size={10} /> {game.owner?.location || "UNKNOWN_SECTOR"}
                       </p>
@@ -227,16 +228,17 @@ export default function Marketplace({ session }) {
       )}
 
       {/* 4. DETAILS MODAL (Holographic) */}
-      {selectedGame && (
+      {/* 4. DETAILS MODAL (Holographic) */}
+      {selectedGame && createPortal(
         <div className="fixed inset-0 bg-void-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="bg-void-800 w-full max-w-4xl clip-chamfer border border-white/10 shadow-2xl relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
 
-            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white rounded-full">
-              <X size={20} />
+            <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-[60] p-2 bg-black/50 hover:text-flux transition text-white rounded-full cursor-pointer pointer-events-auto">
+              <X size={24} />
             </button>
 
             {/* Visual */}
-            <div className="w-full md:w-1/2 relative bg-black min-h-[300px]">
+            <div className="w-full md:w-1/2 relative bg-black h-56 md:h-auto md:min-h-[300px] shrink-0">
               {selectedGame.cover_url ? (
                 <img src={selectedGame.cover_url} className="w-full h-full object-cover opacity-70" />
               ) : (
@@ -272,11 +274,15 @@ export default function Marketplace({ session }) {
                   onClick={() => { setSelectedGame(null); navigate(`/user/${selectedGame.owner_id}`); }}
                   className="flex items-center gap-4 p-4 bg-void-900 border border-white/5 hover:border-cyber/30 transition cursor-pointer clip-chamfer"
                 >
-                  <div className="w-10 h-10 bg-void-700 flex items-center justify-center font-mech font-bold text-white border border-white/10">
-                    {selectedGame.owner?.username?.[0]}
+                  <div className="w-10 h-10 bg-void-700 flex items-center justify-center font-mech font-bold text-white border border-white/10 overflow-hidden">
+                    {selectedGame.owner?.avatar_url ? (
+                      <img src={selectedGame.owner.avatar_url} className="w-full h-full object-cover" alt={selectedGame.owner.username} />
+                    ) : (
+                      selectedGame.owner?.username?.[0]
+                    )}
                   </div>
                   <div>
-                    <p className="text-white font-bold text-sm">@{selectedGame.owner?.username}</p>
+                    <p className="text-white font-bold text-sm">{selectedGame.owner?.username}</p>
                     <p className="text-slate-500 text-[10px] font-code">LOC: {selectedGame.owner?.location || "N/A"}</p>
                   </div>
                 </div>
@@ -285,12 +291,13 @@ export default function Marketplace({ session }) {
                   onClick={() => navigate(`/chat/${selectedGame.owner_id}`)}
                   className="w-full bg-cyber/10 hover:bg-cyber hover:text-black border border-cyber text-cyber font-mech font-bold py-4 flex items-center justify-center gap-2 transition-all clip-chamfer"
                 >
-                  <MessageCircle size={18} /> INITIATE_COMMS
+                  <MessageCircle size={18} /> INITIATE_CHAT
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

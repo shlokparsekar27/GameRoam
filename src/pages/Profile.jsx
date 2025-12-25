@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -12,6 +13,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
   const toast = useToast(); // <--- HOOK
   const [profile, setProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -53,10 +55,10 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
   }
 
   const handleLogout = async () => {
-    if (confirm("CONFIRM: Terminate Session?")) {
+    if (confirm("CONFIRM: LOGOUT?")) {
       navigate('/');
       await supabase.auth.signOut();
-      toast.info("SESSION TERMINATED.");
+      toast.info("LOGOUT SUCCESS.");
     }
   };
 
@@ -89,7 +91,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-48 pt-24 md:pt-28 animate-in fade-in duration-700">
+    <div className="max-w-5xl mx-auto px-4 pb-40 animate-in fade-in duration-700">
 
       {/* --- 1. OPERATOR DOSSIER HEADER --- */}
       <div className="bg-void-900 border border-white/10 clip-chamfer p-1 mb-10 relative group shadow-2xl">
@@ -99,9 +101,41 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
 
         <div className="relative z-10 bg-void-950/80 backdrop-blur-sm clip-chamfer p-6 md:p-10 flex flex-col md:flex-row gap-8 items-start">
 
+          {/* Absolute Settings / Edit Controls - MOVED TO TOP RIGHT OF HEADER */}
+          {!isEditing && (
+            <div className="absolute top-4 right-4 z-20">
+              <div className="relative">
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="p-2 bg-black/50 hover:bg-cyber hover:text-black text-white border border-white/10 rounded-full transition-all"
+                >
+                  <Settings size={18} />
+                </button>
+
+                {/* Settings Dropdown */}
+                {showSettings && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-void-900 border border-white/10 shadow-xl clip-chamfer flex flex-col z-30 animate-in fade-in zoom-in-50 duration-200">
+                    <button
+                      onClick={() => { setIsEditing(true); setShowSettings(false); }}
+                      className="px-4 py-3 text-left text-xs font-code text-slate-300 hover:bg-white/5 hover:text-cyber border-b border-white/5 flex items-center gap-2"
+                    >
+                      <Settings size={14} /> EDIT_PROFILE
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="px-4 py-3 text-left text-xs font-code text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-2"
+                    >
+                      <LogOut size={14} /> LOGOUT
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Avatar Module */}
-          <div className="relative shrink-0 mx-auto md:mx-0">
-            <div className="w-32 h-32 md:w-40 md:h-40 clip-chamfer bg-void-800 border-2 border-white/10 p-1 overflow-hidden relative group-hover:border-cyber/50 transition">
+          <div className="relative shrink-0">
+            <div className="w-24 h-24 md:w-40 md:h-40 clip-chamfer bg-void-800 border-2 border-white/10 p-1 overflow-hidden relative group-hover:border-cyber/50 transition">
               <div className="w-full h-full bg-void-950 clip-chamfer overflow-hidden relative">
                 {uploading && <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20"><Loader2 className="animate-spin text-cyber" /></div>}
 
@@ -124,14 +158,17 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
                 <input id="pfp-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
               </>
             )}
+
+            {/* Absolute Settings / Edit Controls */}
+            {/* Data Module */}
           </div>
 
           {/* Data Module */}
           <div className="flex-1 w-full">
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
 
-              <div className="flex-1 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+              <div className="flex-1 text-left">
+                <div className="flex items-center justify-start gap-2 mb-2">
                   <Cpu size={14} className="text-cyber" />
                   <span className="text-[10px] font-code text-cyber uppercase tracking-widest">Operator Identity</span>
                 </div>
@@ -140,14 +177,14 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
                   <input
                     value={formData.username}
                     onChange={e => setFormData({ ...formData, username: e.target.value })}
-                    className="bg-void-950 border border-void-700 text-2xl font-mech font-bold text-white focus:border-cyber outline-none w-full md:w-auto p-2 clip-chamfer uppercase text-center md:text-left"
+                    className="bg-void-950 border border-void-700 text-2xl font-mech font-bold text-white focus:border-cyber outline-none w-full md:w-auto p-2 clip-chamfer uppercase text-left"
                     placeholder="CALLSIGN..."
                   />
                 ) : (
                   <h1 className="text-3xl md:text-5xl font-mech font-bold text-white uppercase tracking-wide mb-2">{profile?.username || "UNKNOWN_USER"}</h1>
                 )}
 
-                <div className="flex justify-center md:justify-start gap-4 text-xs font-code text-slate-500 mt-4">
+                <div className="flex justify-start gap-4 text-xs font-code text-slate-500 mt-4">
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-void-800 border border-white/5 clip-chamfer">
                     <span className="text-white font-bold">{myPosts.length}</span> LOGS
                   </div>
@@ -157,22 +194,13 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
                 </div>
               </div>
 
-              {/* Control Panel */}
-              <div className="flex gap-2 w-full md:w-auto justify-center">
-                {isEditing ? (
+              {/* Control Panel (Editing Mode ONLY now) */}
+              <div className="flex gap-2">
+                {isEditing && (
                   <>
                     <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-void-800 border border-white/10 text-slate-400 font-code text-xs hover:text-white hover:border-white transition clip-chamfer">CANCEL</button>
                     <button onClick={handleUpdateProfile} disabled={loading} className="px-4 py-2 bg-cyber text-black font-mech font-bold text-xs hover:bg-white transition flex items-center gap-2 clip-chamfer shadow-neon-cyan">
                       {loading && <Loader2 size={14} className="animate-spin" />} SAVE_CHANGES
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => setIsEditing(true)} className="p-3 bg-void-800 border border-white/10 text-cyber hover:bg-cyber hover:text-black transition clip-chamfer" title="Update Registry">
-                      <Settings size={18} />
-                    </button>
-                    <button onClick={handleLogout} className="p-3 bg-void-800 border border-white/10 text-flux hover:bg-flux hover:text-black transition clip-chamfer" title="Terminate Session">
-                      <LogOut size={18} />
                     </button>
                   </>
                 )}
@@ -180,7 +208,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
             </div>
 
             {/* Bio / Meta Data */}
-            <div className="space-y-4 max-w-2xl text-sm border-t border-white/5 pt-4 mx-auto md:mx-0">
+            <div className="space-y-4 max-w-2xl text-sm border-t border-white/5 pt-4">
               {isEditing ? (
                 <div className="grid grid-cols-1 gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -212,7 +240,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex flex-wrap justify-start gap-4">
                     <div className="text-slate-400 font-code text-xs flex items-center gap-2">
                       <MapPin size={12} className="text-cyber" /> {profile?.location || "UNKNOWN_SECTOR"}
                     </div>
@@ -262,7 +290,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
 
       {/* POSTS TAB */}
       {activeTab === 'posts' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
           {myPosts.length === 0 ? (
             <div className="col-span-full py-20 text-center border border-dashed border-void-700 bg-void-900/30 clip-chamfer">
               <Camera className="text-void-700 mx-auto mb-4" size={32} />
@@ -278,14 +306,14 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
                 className="group relative aspect-square bg-void-800 clip-chamfer border border-white/5 cursor-pointer hover:border-cyber/50 transition duration-300"
               >
                 {post.image_url ? (
-                  <img src={post.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-500" />
+                  <img src={post.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500" />
                 ) : (
                   <div className="w-full h-full p-6 flex items-center justify-center bg-void-900 text-center">
                     <p className="text-slate-500 font-code text-xs italic line-clamp-4">"{post.content}"</p>
                   </div>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover:translate-y-0 transition duration-300">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
                   <div className="flex items-center gap-2 font-bold font-code text-cyber text-sm">
                     <Heart className="fill-cyber" size={14} /> {post.likes_count || 0}
                   </div>
@@ -298,7 +326,7 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
 
       {/* VAULT TAB */}
       {activeTab === 'listings' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {myListings.length === 0 ? (
             <div className="col-span-full py-20 text-center border border-dashed border-void-700 bg-void-900/30 clip-chamfer">
               <Archive className="text-void-700 mx-auto mb-4" size={32} />
@@ -338,13 +366,13 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
       )}
 
       {/* --- DETAILS MODAL --- */}
-      {selectedGame && (
+      {selectedGame && createPortal(
         <div className="fixed inset-0 bg-void-900/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-void-800 w-full max-w-2xl clip-chamfer border border-white/10 shadow-2xl relative flex flex-col md:flex-row max-h-[90vh] overflow-y-auto">
 
             <button onClick={() => setSelectedGame(null)} className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white rounded-full"><X size={20} /></button>
 
-            <div className="w-full md:w-1/2 relative bg-black min-h-[250px]">
+            <div className="w-full md:w-1/2 relative bg-black h-56 md:h-auto md:min-h-[250px] shrink-0">
               {selectedGame.cover_url ? (
                 <img src={selectedGame.cover_url} className="w-full h-full object-cover opacity-80" />
               ) : (
@@ -381,7 +409,8 @@ export default function Profile({ session, initialProfile, onProfileUpdate }) {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

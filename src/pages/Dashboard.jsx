@@ -23,6 +23,7 @@ export default function Dashboard({ session }) {
   const [filter, setFilter] = useState('All');
   const [searchText, setSearchText] = useState('');
   const [isFiltersVisible, setIsFiltersVisible] = useState(true);
+  const [isStatsVisible, setIsStatsVisible] = useState(false); // New State for Mobile Stats
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
@@ -119,19 +120,29 @@ export default function Dashboard({ session }) {
                 </p>
               </div>
 
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="group relative w-full md:w-auto px-6 py-3 bg-cyber/10 hover:bg-cyber/20 border border-cyber text-cyber font-mech font-bold tracking-widest uppercase transition-all hover:shadow-neon-cyan overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <Plus size={18} /> Initialize Asset
-                </span>
-                <div className="absolute inset-0 bg-cyber/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </button>
+              <div className="flex gap-2">
+                {/* Mobile Stats Toggle */}
+                <button
+                  onClick={() => setIsStatsVisible(!isStatsVisible)}
+                  className="md:hidden p-3 bg-void-800 border border-white/10 text-cyber hover:bg-cyber hover:text-black transition clip-chamfer"
+                >
+                  <Activity size={18} />
+                </button>
+
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="group relative w-full md:w-auto px-6 py-3 bg-cyber/10 hover:bg-cyber/20 border border-cyber text-cyber font-mech font-bold tracking-widest uppercase transition-all hover:shadow-neon-cyan overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <Plus size={18} /> <span className="hidden md:inline">ADD_ASSET</span><span className="md:hidden">ADD_ASSET</span>
+                  </span>
+                  <div className="absolute inset-0 bg-cyber/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                </button>
+              </div>
             </div>
 
             {/* UPDATED STATS GRID (3 Columns for better fit) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 ${isStatsVisible ? '' : 'hidden md:grid'}`}>
               {[
                 { label: 'Total Assets', value: stats.total, color: 'text-white', icon: Cpu },
                 { label: 'Vault Core', value: stats.library, color: 'text-slate-300', icon: Archive },
@@ -159,7 +170,7 @@ export default function Dashboard({ session }) {
 
         {/* 2. FILTER & SEARCH CONTROL STRIP */}
         <div
-          className={`sticky top-20 md:top-24 z-30 mb-8 md:mb-10 transition-all duration-500 ${isFiltersVisible ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'
+          className={`sticky top-20 md:top-20 z-30 mb-8 md:mb-10 transition-all duration-500 ${isFiltersVisible ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'
             }`}
         >
           <div className="flex flex-col md:flex-row gap-4 items-center bg-void-800/90 backdrop-blur-xl border border-white/10 p-2 rounded-xl shadow-2xl">
@@ -208,68 +219,70 @@ export default function Dashboard({ session }) {
             <h3 className="text-xl font-mech font-bold text-slate-300">SECTOR EMPTY</h3>
             <p className="text-slate-500 font-code text-xs mb-6">No assets found matching parameters.</p>
             <button onClick={() => setIsAddModalOpen(true)} className="text-cyber font-bold hover:underline font-code text-sm">
-              [INIT_NEW_ASSET]
+              [ADD_NEW_ASSET]
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             <AnimatePresence>
               {filteredGames.map((game) => (
                 <motion.div
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   key={game.id}
                   onClick={() => setSelectedGame(game)}
-                  className="group relative bg-void-800 cursor-pointer"
+                  className="group relative bg-void-800 clip-chamfer border border-white/5 cursor-pointer hover:border-cyber/50 hover:shadow-neon-cyan transition-all duration-300 flex flex-col"
                 >
-                  {/* CHAMFERED CLIP & BORDER */}
-                  <div className="clip-chamfer bg-void-800 border border-void-700 group-hover:border-cyber/50 transition-colors duration-300 h-full">
-
-                    {/* Image Area */}
-                    <div className="aspect-[3/4] md:aspect-[3/4] relative overflow-hidden">
-                      {game.cover_url ? (
-                        <img
-                          src={game.cover_url}
-                          alt={game.title}
-                          className={`w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:contrast-125 ${game.listing_type === 'Sold' ? 'grayscale opacity-50' : ''}`}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-void-900 text-void-700">
-                          <Gamepad2 size={48} />
-                        </div>
-                      )}
-
-                      {/* Cyber Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-void-900 via-transparent to-transparent opacity-80" />
-
-                      {/* UPDATED BADGE SYSTEM */}
-                      <div className="absolute top-0 right-0 p-2">
-                        <span className={`px-2 py-1 text-[10px] font-code font-bold border backdrop-blur-md ${game.listing_type === 'Sale' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' :
-                            game.listing_type === 'Rent' ? 'bg-cyber/10 border-cyber text-cyber' :
-                              game.listing_type === 'Rented In' ? 'bg-purple-500/10 border-purple-500 text-purple-400' :
-                                game.listing_type === 'Rented Out' ? 'bg-amber-500/10 border-amber-500 text-amber-400' :
-                                  game.listing_type === 'Sold' ? 'bg-slate-800/80 border-slate-600 text-slate-500 line-through' :
-                                    'bg-slate-800/80 border-slate-600 text-slate-300'
-                          }`}>
-                          {getFilterLabel(game.listing_type).toUpperCase()}
-                        </span>
+                  {/* Image Area - Matched to Marketplace Height */}
+                  <div className="aspect-[3/4] relative overflow-hidden bg-void-950 border-b border-white/5">
+                    {game.cover_url ? (
+                      <img
+                        src={game.cover_url}
+                        alt={game.title}
+                        className={`w-full h-full object-cover transition duration-700 ease-out group-hover:scale-110 ${game.listing_type === 'Sold' ? 'grayscale opacity-50' : ''}`}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-void-900 text-void-700">
+                        <Gamepad2 size={64} />
                       </div>
+                    )}
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-void-900 via-transparent to-transparent opacity-90" />
+
+                    {/* Left Badge: Listing Type */}
+                    <div className="absolute top-2 left-0">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold font-code clip-chamfer ${game.listing_type === 'Sale' ? 'bg-emerald-500 text-black' :
+                        game.listing_type === 'Rent' ? 'bg-cyber text-black' :
+                          game.listing_type === 'Rented In' ? 'bg-purple-500 text-black' :
+                            game.listing_type === 'Rented Out' ? 'bg-amber-500 text-black' :
+                              game.listing_type === 'Sold' ? 'bg-slate-700 text-slate-300 line-through' :
+                                'bg-void-700 text-slate-300'
+                        }`}>
+                        {getFilterLabel(game.listing_type).toUpperCase()}
+                      </span>
                     </div>
 
-                    {/* Footer Info */}
-                    <div className="p-4 border-t border-white/5">
-                      <h3 className={`font-mech font-bold text-white text-lg truncate mb-1 leading-none ${game.listing_type === 'Sold' ? 'text-slate-500' : ''}`}>
-                        {game.title}
-                      </h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-code text-slate-500 bg-white/5 px-1.5 py-0.5 rounded">{game.platform}</span>
-                        <div className="font-code font-bold text-xs">
-                          {game.listing_type === 'Sale' && <span className="text-emerald-400">${game.price}</span>}
-                          {game.listing_type === 'Rent' && <span className="text-cyber">${game.price}/wk</span>}
-                          {game.listing_type === 'Sold' && <span className="text-slate-600">SOLD</span>}
-                        </div>
+                    {/* Right Badge: Platform */}
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold font-code text-white">
+                      {game.platform}
+                    </div>
+                  </div>
+
+                  {/* Footer Info - Matched to Marketplace Layout */}
+                  <div className="p-4 md:p-5 flex flex-col flex-1">
+                    <h3 className={`font-mech font-bold text-white text-lg truncate mb-2 group-hover:text-cyber transition ${game.listing_type === 'Sold' ? 'text-slate-500' : ''}`}>
+                      {game.title}
+                    </h3>
+
+                    <div className="flex items-baseline gap-2 mt-auto">
+                      <div className="font-code font-bold text-xl">
+                        {game.listing_type === 'Sale' && <span className="text-emerald-400">${game.price}</span>}
+                        {game.listing_type === 'Rent' && <span className="text-cyber">${game.price}<span className="text-[10px] text-slate-500 ml-1">/WK</span></span>}
+                        {game.listing_type === 'Sold' && <span className="text-slate-600 text-sm">SOLD</span>}
+                        {['Library', 'Rented In', 'Rented Out'].includes(game.listing_type) && <span className="text-slate-500 text-xs">VAULT ASSET</span>}
                       </div>
                     </div>
                   </div>
@@ -294,7 +307,7 @@ export default function Dashboard({ session }) {
 
             <button
               onClick={() => setSelectedGame(null)}
-              className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-flux text-white transition rounded-full"
+              className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:text-flux transition text-white rounded-full"
             >
               <X size={20} />
             </button>

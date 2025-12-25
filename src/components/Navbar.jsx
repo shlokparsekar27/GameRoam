@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Gamepad2, ShoppingBag, MessageCircle, User, Users, Menu, X, Bell } from 'lucide-react';
+import { Gamepad2, ShoppingBag, MessageCircle, User, Users, Menu, X, Bell, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar({ session, profile }) {
@@ -17,6 +17,22 @@ export default function Navbar({ session, profile }) {
     <>
       <DesktopNav session={session} profile={profile} scrolled={scrolled} />
       <MobileNav session={session} profile={profile} />
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-void-950 border-b border-white/10 px-4 py-3 flex items-center justify-between">
+        <Link to="/about" className="flex items-center gap-2">
+          <Gamepad2 className="text-cyber" size={20} />
+          <span className="font-mech font-bold text-lg text-white tracking-widest uppercase">
+            Game<span className="text-cyber">Roam</span>
+          </span>
+        </Link>
+        <Link to="/profile" className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 relative">
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-void-800 flex items-center justify-center text-cyber"><User size={14} /></div>
+          )}
+        </Link>
+      </div>
     </>
   );
 }
@@ -50,9 +66,10 @@ function DesktopNav({ session, profile, scrolled }) {
             </div>
           </Link>
 
-          {/* CENTER: Navigation Links (Re-ordered for logical flow) */}
+          {/* CENTER: Navigation Links */}
           <div className="flex items-center gap-2">
             <DesktopNavLink to="/vault" label="Vault" icon={Gamepad2} />
+            <DesktopNavLink to="/arcade" label="Arcade" icon={Play} /> {/* NEW MODULE */}
             <DesktopNavLink to="/marketplace" label="Market" icon={ShoppingBag} />
             <DesktopNavLink to="/community" label="Community" icon={Users} />
           </div>
@@ -135,39 +152,19 @@ function MobileNav({ session, profile }) {
         <div className="flex items-center justify-around relative">
 
           <MobileNavLink to="/vault" icon={Gamepad2} label="Vault" />
-          <MobileNavLink to="/community" icon={Users} label="Social" />
+          <MobileNavLink to="/arcade" icon={Play} label="Play" />
 
-          {/* Center Action Button (FAB) */}
-          <Link to="/marketplace" className="relative group -mt-8">
+          {/* Center Action Button (FAB) (Marketplace) - Slightly tweaked for 5-item layout */}
+          <Link to="/marketplace" className="relative group -mt-8 flex flex-col items-center">
             <div className="absolute inset-0 bg-cyber blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
-            <div className="relative w-14 h-14 bg-void-900 border border-cyber/30 rounded-2xl flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-all duration-300 shadow-neon-cyan">
-              <ShoppingBag className="w-6 h-6 text-cyber -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+            <div className="relative w-12 h-12 bg-void-900 border border-cyber/30 rounded-2xl flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-all duration-300 shadow-neon-cyan">
+              <ShoppingBag className="w-5 h-5 text-cyber -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
             </div>
+            {/* Optional Label for consistency if space permits, or leave icon-only for emphasis */}
           </Link>
 
-          <MobileNavLink to="/chat" icon={MessageCircle} label="Chat" alert />
-
-          {/* Profile Tab */}
-
-          {/* Profile Tab */}
-          <NavLink to="/profile" className={({ isActive }) => `flex flex-col items-center gap-1 p-2 transition-all ${isActive ? 'scale-110' : 'opacity-60'}`}>
-            {({ isActive }) => (
-              <>
-                <div className={`w-6 h-6 rounded-full overflow-hidden border ${isActive ? 'border-cyber' : 'border-transparent'}`}>
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Me" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-void-700 flex items-center justify-center text-cyber text-[10px]">
-                      <User size={12} />
-                    </div>
-                  )}
-                </div>
-                <span className={`text-[9px] font-mech font-bold uppercase tracking-widest ${isActive ? 'text-cyber' : 'text-slate-400'}`}>
-                  Me
-                </span>
-              </>
-            )}
-          </NavLink>
+          <MobileNavLink to="/community" icon={Users} label="Social" />
+          <MobileNavLink to="/chat" icon={MessageCircle} label="Chat" />
 
         </div>
       </div>

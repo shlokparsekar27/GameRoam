@@ -60,7 +60,32 @@ export default function Community() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
 
-        {/* 1. UPCOMING DATA STREAM */}
+        {/* 1. THE ARENA LINK (Portal) - MOVED TO FIRST POSITION */}
+        <div
+          onClick={() => navigate('/community/feed')}
+          className="relative overflow-hidden cursor-pointer group h-full clip-chamfer border border-cyber/30 bg-void-900 transition-all duration-500 hover:border-cyber hover:shadow-neon-cyan lg:col-span-1"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-cyber/20 via-void-950 to-void-950 opacity-50 group-hover:opacity-100 transition duration-700" />
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 group-hover:opacity-20 transition" />
+
+          <div className="relative z-10 p-8 h-full flex flex-col justify-between">
+            <div>
+              <div className="w-16 h-16 bg-cyber/10 flex items-center justify-center border border-cyber/50 mb-8 clip-chamfer group-hover:bg-cyber group-hover:text-black transition duration-500 text-cyber">
+                <Globe size={32} />
+              </div>
+              <h2 className="text-3xl font-mech font-bold text-white uppercase mb-4 leading-none">The Arena <br /><span className="text-cyber text-lg">Public Frequency</span></h2>
+              <p className="text-slate-400 font-code text-sm leading-relaxed border-l-2 border-slate-700 pl-4">
+                Access the global feed. Share intel, post clips, and communicate with other operators in real-time.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 text-cyber font-bold font-mech tracking-widest text-lg group-hover:translate-x-4 transition-transform duration-300 mt-10">
+              INITIALIZE_UPLINK <ArrowRight size={18} />
+            </div>
+          </div>
+        </div>
+
+        {/* 2. UPCOMING DATA STREAM */}
         <div className="bg-void-900 border border-white/10 clip-chamfer p-1 relative group h-full flex flex-col hover:border-purple-500/50 transition duration-500">
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50" />
 
@@ -93,7 +118,7 @@ export default function Community() {
           </div>
         </div>
 
-        {/* 2. TRENDING DATA STREAM */}
+        {/* 3. TRENDING DATA STREAM */}
         <div className="bg-void-900 border border-white/10 clip-chamfer p-1 relative group h-full flex flex-col hover:border-orange-500/50 transition duration-500">
           <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-50" />
 
@@ -128,31 +153,6 @@ export default function Community() {
                   <ExternalLink size={12} className="text-slate-600 group-hover/item:text-orange-500 opacity-0 group-hover/item:opacity-100 transition -translate-x-2 group-hover/item:translate-x-0" />
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 3. THE ARENA LINK (Portal) */}
-        <div
-          onClick={() => navigate('/community/feed')}
-          className="relative overflow-hidden cursor-pointer group h-full clip-chamfer border border-cyber/30 bg-void-900 transition-all duration-500 hover:border-cyber hover:shadow-neon-cyan"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-cyber/20 via-void-950 to-void-950 opacity-50 group-hover:opacity-100 transition duration-700" />
-          <div className="absolute inset-0 bg-grid-pattern opacity-10 group-hover:opacity-20 transition" />
-
-          <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-16 h-16 bg-cyber/10 flex items-center justify-center border border-cyber/50 mb-8 clip-chamfer group-hover:bg-cyber group-hover:text-black transition duration-500 text-cyber">
-                <Globe size={32} />
-              </div>
-              <h2 className="text-3xl font-mech font-bold text-white uppercase mb-4 leading-none">The Arena <br /><span className="text-cyber text-lg">Public Frequency</span></h2>
-              <p className="text-slate-400 font-code text-sm leading-relaxed border-l-2 border-slate-700 pl-4">
-                Access the global feed. Share intel, post clips, and communicate with other operators in real-time.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3 text-cyber font-bold font-mech tracking-widest text-lg group-hover:translate-x-4 transition-transform duration-300 mt-10">
-              INITIALIZE_UPLINK <ArrowRight size={18} />
             </div>
           </div>
         </div>

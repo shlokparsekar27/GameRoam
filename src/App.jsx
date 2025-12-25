@@ -13,6 +13,7 @@ import { ToastProvider } from './components/TacticalToast'; // <--- IMPORT
 
 // Pages
 import Dashboard from './pages/Dashboard';
+import Arcade from './pages/Arcade';
 import Profile from './pages/Profile';
 import Marketplace from './pages/Marketplace';
 import UserProfile from './pages/UserProfile';
@@ -133,6 +134,7 @@ export default function App() {
               <Route path="/about" element={<About />} />
 
               <Route path="/vault" element={<Dashboard session={session} />} />
+              <Route path="/arcade" element={<Arcade />} />
               <Route path="/profile" element={<Profile session={session} initialProfile={userProfile} onProfileUpdate={() => fetchUserProfile(session.user.id)} />} />
               <Route path="/marketplace" element={<Marketplace session={session} />} />
               <Route path="/user/:userId" element={<UserProfile session={session} />} />

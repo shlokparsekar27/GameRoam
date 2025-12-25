@@ -149,7 +149,7 @@ export default function Chat({ session }) {
   }
 
   async function handleClearHistory() {
-    if (!confirm("PURGE HISTORY: This will wipe your local logs.")) return;
+    if (!confirm("DELETE HISTORY: This will delete all messages.")) return;
     await supabase.from('messages').update({ deleted_by_sender: true }).eq('sender_id', myId).eq('receiver_id', receiverId);
     await supabase.from('messages').update({ deleted_by_receiver: true }).eq('receiver_id', myId).eq('sender_id', receiverId);
     setMessages([]);
@@ -195,7 +195,7 @@ export default function Chat({ session }) {
           {showMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-void-900 border border-void-700 shadow-2xl z-20 clip-chamfer animate-in slide-in-from-top-2">
               <button onClick={handleClearHistory} className="w-full text-left px-4 py-3 text-xs font-code text-flux hover:bg-flux/10 flex items-center gap-2 transition uppercase tracking-wider">
-                <XCircle size={14} /> PURGE_LOGS
+                <XCircle size={14} /> DELETE_HISTORY
               </button>
             </div>
           )}
@@ -231,8 +231,8 @@ export default function Chat({ session }) {
                   )}
 
                   <div className={`clip-chamfer p-3 md:p-4 relative border shadow-lg ${isMe
-                      ? 'bg-cyber/10 border-cyber/30 text-white'
-                      : 'bg-void-800 border-white/10 text-slate-300'
+                    ? 'bg-cyber/10 border-cyber/30 text-white'
+                    : 'bg-void-800 border-white/10 text-slate-300'
                     }`}>
                     {/* Decorative Corner for 'Them' */}
                     {!isMe && <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white/30" />}
